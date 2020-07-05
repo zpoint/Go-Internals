@@ -10,7 +10,7 @@ cd go
 git reset --hard dd150176c3cc49da68c8179f740eadc79404d351
 ```
 
-I am new to [go](https://github.com/golang/go), I will try my best to keep the contents in this repo the same as [CPython-Internals](https://github.com/zpoint/CPython-Internals) and [Redis-Internals](https://github.com/zpoint/Redis-Internals)
+I am new to [go](https://github.com/golang/go), I will try my best to keep the contents in this repo the same style as [CPython-Internals](https://github.com/zpoint/CPython-Internals) and [Redis-Internals](https://github.com/zpoint/Redis-Internals)
 
 # Table of Contents
 
