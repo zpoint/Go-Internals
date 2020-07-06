@@ -78,7 +78,7 @@ Installed commands in /Users/zpoint/Desktop/go/bin
 *** You need to add /Users/zpoint/Desktop/go/bin to your PATH
 ```
 
-Add the specific version to ```bash_profile```
+Add the specific version to `~/.zshenv`(or `~/.bash_profile` depends on your shell)
 
 ```bash
 % vim ~/.zshenv
