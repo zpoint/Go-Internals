@@ -94,8 +94,57 @@ go_dev: aliased to /Users/zpoint/Desktop/go/bin/go
 
 ## add a print function call to runtime/map.go
 
+If we edit the file ```src/runtime/map.go``` to import a ```fmt``` package and add a ```fmt.Println``` function call in ```makemap``` function
 
+```go
+import (
+	// ...
+   "fmt"
+)
+// ...
+func makemap(t *maptype, hint int, h *hmap) *hmap {
+	fmt.Println("in t *maptype", t, "hint int", hint, "h *hmap", h)
+  // ...
+}
+```
+
+rebuild the runtime package
+
+```bash
+% vim make.bash
+# ./cmd/dist/dist bootstrap -a -v
+./cmd/dist/dist install  -v "runtime"
+src % ./all.bash
+```
+
+And try to compile and run an example
+
+```go
+% cat my_dict.go 
+package main
+
+import "fmt"
+
+func main() {
+        d := make(map[int]string)
+        fmt.Println("d", d)
+}
+
+% go_dev run my_dict.go 
+warning: GOPATH set to GOROOT (/Users/zpoint/Desktop/go) has no effect
+package command-line-arguments
+        imports fmt
+        imports errors
+        imports internal/reflectlite
+        imports runtime
+        imports fmt: import cycle not allowed
+```
+
+We find that the `fmt` package import `runtime` and `runtime` import `fmt`(we manually add it) which cause import cycle
 
 # read more
 
 [Go: Installing Multiple Go Versions from Source](https://medium.com/@vCabbage/go-installing-multiple-go-versions-from-source-db5573067c)
+
+[is-there-anything-in-zsh-like-bash-profile](https://stackoverflow.com/questions/23090390/is-there-anything-in-zsh-like-bash-profile)
+
