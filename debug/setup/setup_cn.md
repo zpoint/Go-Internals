@@ -98,13 +98,13 @@ go_dev: aliased to /Users/zpoint/Desktop/go/bin/go
 
 ```go
 import (
-	// ...
+   // ...
    "fmt"
 )
 // ...
 func makemap(t *maptype, hint int, h *hmap) *hmap {
 	fmt.Println("in t *maptype", t, "hint int", hint, "h *hmap", h)
-  // ...
+	// ...
 }
 ```
 
@@ -143,10 +143,11 @@ package command-line-arguments
 
 所以我们没法在 `runtime` 中使用 `fmt` 包, 幸运的是, 我在相同的包下发现了 `runtime/print.go`  文件, 里面有比较多的低级的 print 函数可在`runtime` 下直接使用
 
+或者我们可以直接使用内建 `print` 和 `println` 函数
+
 我们再次编辑 ```src/runtime/map.go```
 
 ```go
-// ...
 func makemap(t *maptype, hint int, h *hmap) *hmap {
 	printstring("t *maptype: ")
 	printpointer(unsafe.Pointer(t))
@@ -155,7 +156,8 @@ func makemap(t *maptype, hint int, h *hmap) *hmap {
 	printstring("\thmap： ")
 	printpointer(unsafe.Pointer(h))
 	printstring("\n")
-  // ...
+	println("maptype", t)
+	// ...
 }
 ```
 
@@ -166,6 +168,7 @@ src % ./all.bash
 ...
 example % go_dev run my_dict.go
 t *maptype: 0x10b5400   hint： 10       hmap： 0x0
+maptype 0x10b5400
 d map[]
 ```
 
@@ -177,3 +180,4 @@ d map[]
 
 [is-there-anything-in-zsh-like-bash-profile](https://stackoverflow.com/questions/23090390/is-there-anything-in-zsh-like-bash-profile)
 
+[difference-between-fmt-println-and-println-in-go](https://stackoverflow.com/questions/14680255/difference-between-fmt-println-and-println-in-go)

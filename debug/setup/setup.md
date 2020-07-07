@@ -98,13 +98,13 @@ If we edit the file ```src/runtime/map.go``` to import a ```fmt``` package and a
 
 ```go
 import (
-	// ...
+   // ...
    "fmt"
 )
 // ...
 func makemap(t *maptype, hint int, h *hmap) *hmap {
 	fmt.Println("in t *maptype", t, "hint int", hint, "h *hmap", h)
-  // ...
+	// ...
 }
 ```
 
@@ -143,10 +143,11 @@ We find that the `fmt` package import `runtime` and `runtime` import `fmt`(we ma
 
 So we're not able to use `fmt` inside the `runtime` package, Luckily, There  exist a file `runtime/print.go` which has some low level print function can be used directly inside the  `runtime` package
 
+Or we can use the built-in `print` and `println` function 
+
 Again we edit ```src/runtime/map.go```
 
 ```go
-// ...
 func makemap(t *maptype, hint int, h *hmap) *hmap {
 	printstring("t *maptype: ")
 	printpointer(unsafe.Pointer(t))
@@ -155,7 +156,8 @@ func makemap(t *maptype, hint int, h *hmap) *hmap {
 	printstring("\thmap： ")
 	printpointer(unsafe.Pointer(h))
 	printstring("\n")
-  // ...
+	println("maptype", t)
+	// ...
 }
 ```
 
@@ -164,8 +166,9 @@ rebuild `runtime` package and run our example
 ```bash
 src % ./all.bash
 ...
-example % go_dev run my_dict.go
-t *maptype: 0x10b5400   hint： 10       hmap： 0x0
+example % zpoint@zpoints-MacBook-Pro example % go_dev run my_dict.go
+t *maptype: 0x10b5840   hint： 10       hmap： 0x0
+maptype 0x10b5840
 d map[]
 ```
 
@@ -177,3 +180,4 @@ And it works
 
 [is-there-anything-in-zsh-like-bash-profile](https://stackoverflow.com/questions/23090390/is-there-anything-in-zsh-like-bash-profile)
 
+[difference-between-fmt-println-and-println-in-go](https://stackoverflow.com/questions/14680255/difference-between-fmt-println-and-println-in-go)
