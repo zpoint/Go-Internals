@@ -13,7 +13,7 @@
 
 # why
 
-In order to debug the [go](https://github.com/golang/go) programming language, The first step is to add a print function call to any of the runtime module and build from the source code, compile a helloworld example to observe the output
+In order to debug the [go](https://github.com/golang/go) programming language, The first step is to add a print function call to any of the runtime package and build from the source code, compile a helloworld example to observe the output
 
 There exist other alternative [delve](https://github.com/go-delve/delve) as go debugger
 
@@ -131,7 +131,6 @@ func main() {
 }
 
 % go_dev run my_dict.go 
-warning: GOPATH set to GOROOT (/Users/zpoint/Desktop/go) has no effect
 package command-line-arguments
         imports fmt
         imports errors

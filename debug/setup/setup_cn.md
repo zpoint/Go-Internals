@@ -131,7 +131,6 @@ func main() {
 }
 
 % go_dev run my_dict.go 
-warning: GOPATH set to GOROOT (/Users/zpoint/Desktop/go) has no effect
 package command-line-arguments
         imports fmt
         imports errors
