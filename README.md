@@ -20,7 +20,7 @@ I am new to [go](https://github.com/golang/go) , I will try my best to keep the 
 
 # Debug
 
-- [ ] [setup(how to debug and build from source code)](https://github.com/zpoint/go-Internals/blob/1.14/debug/setup/setup.md)
+- [x] [setup(build other go from source  code and add a print call to runtime package)](https://github.com/zpoint/go-Internals/blob/1.14/debug/setup/setup.md)
 
 # Objects
 

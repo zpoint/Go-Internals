@@ -19,7 +19,7 @@ There exist other alternative [delve](https://github.com/go-delve/delve) as go d
 
 I need them both
 
-# install other go version from sourcehow
+# how
 
 Let's begin with ```src/runtime/map.go```
 
@@ -126,7 +126,7 @@ package main
 import "fmt"
 
 func main() {
-        d := make(map[int]string)
+        d := make(map[int]string, 10)
         fmt.Println("d", d)
 }
 
@@ -141,6 +141,36 @@ package command-line-arguments
 ```
 
 We find that the `fmt` package import `runtime` and `runtime` import `fmt`(we manually add it) which cause import cycle
+
+So we're not able to use `fmt` inside the `runtime` package, Luckily, There  exist a file `runtime/print.go` which has some low level print function can be used directly inside the  `runtime` package
+
+Again we edit ```src/runtime/map.go```
+
+```go
+// ...
+func makemap(t *maptype, hint int, h *hmap) *hmap {
+	printstring("t *maptype: ")
+	printpointer(unsafe.Pointer(t))
+	printstring("\thint： ")
+	printint(int64(hint))
+	printstring("\thmap： ")
+	printpointer(unsafe.Pointer(h))
+	printstring("\n")
+  // ...
+}
+```
+
+rebuild `runtime` package and run our example
+
+```bash
+src % ./all.bash
+...
+example % go_dev run my_dict.go
+t *maptype: 0x10b5400   hint： 10       hmap： 0x0
+d map[]
+```
+
+And it works
 
 # read more
 

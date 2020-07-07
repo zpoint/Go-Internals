@@ -22,7 +22,7 @@ git reset --hard dd150176c3cc49da68c8179f740eadc79404d351
 
 # Debug
 
-[setup](https://github.com/zpoint/go-Internals/blob/1.14/objects/debug/debug.md)
+- [x] [setup(源码编译安装额外一个 go 版本并在 runtime 包中调用 print 函数)](https://github.com/zpoint/go-Internals/blob/1.14/debug/setup/setup.md)
 
 # Objects
 
