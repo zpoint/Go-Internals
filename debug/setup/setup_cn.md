@@ -1,4 +1,4 @@
-# setup
+# setup![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals%2Fsetup_cn)
 
 # 目录
 

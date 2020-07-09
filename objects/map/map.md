@@ -1,10 +1,12 @@
-# map 
+# map ![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals%2Fmap)
 
 # contents
 
 [related file](#related-file)
 
 [memory layout](#memory-layout)
+
+[insert](#insert)
 
 # related file
 
@@ -15,8 +17,6 @@
 * src/runtime/type.go
 
 # memory layout
-
-# overview
 
 There exists various different version of map implementation
 
@@ -46,3 +46,17 @@ func main() {
 m1, m2 shares the same `maptype`, while m3 is of different `maptype`, the `maptype` is not attached to any of the instance, compiler already knows the type of instance when you declare it and `maptype` is stored as hint in the runtime system
 
 ![maptype](./maptype.png)
+
+This is the layout of `hmap`
+
+![hmap](./hmap.png)
+
+# insert
+
+```go
+func main() {
+	m1 := make(map[int]string)
+	m1[300] = "aaa"
+}
+```
+

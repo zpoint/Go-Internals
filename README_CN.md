@@ -1,4 +1,4 @@
-# go-Internals
+# go-Internals![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals-CN)
 * [简体中文](https://github.com/zpoint/CPython-Internals/blob/master/README_CN.md)
 * 如果你需要接收更新通知, 点击右上角的 **Watch**, 当有文章更新时会在 issue 发布相关标题和链接
 
