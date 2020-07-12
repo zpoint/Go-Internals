@@ -12,6 +12,8 @@
 
 * [tophash](#tophash)
 * [key and element](#key-and-element)
+* [insert](#insert)
+* [resize](#resize)
 
 ## related file
 
@@ -111,5 +113,52 @@ If the current bucket is full, the linear search algorithm will cross the bucket
 
 ### tophash
 
+> tophash generally contains the top byte of the hash value for each key in this bucket. If tophash[0] < minTopHash,tophash[0] is a bucket evacuation state instead.
+
+It can be used for cache and mark, you can traverse the `tophash` field one byte at a time, to get the state of the current hash slot
+
+```go
+/*
+emptyRest      = 0 // this cell is empty, and there are no more non-empty cells at higher indexes or overflows.
+emptyOne       = 1 // this cell is empty
+evacuatedX     = 2 // key/elem is valid.  Entry has been evacuated to first half of larger table.
+evacuatedY     = 3 // same as above, but evacuated to second half of larger table.
+evacuatedEmpty = 4 // cell is empty, bucket is evacuated.
+minTopHash     = 5 // minimum tophash for a normal filled cell.
+*/
+```
+
 ### key and element
+
+the key and element are stored separately, offset is added to get the accurate address of the result
+
+```go
+// 8 for int64, uintptr(t.keysize) for usual case
+k := *((*uint64)(add(unsafe.Pointer(b), dataOffset+i*8)))
+elem := add(unsafe.Pointer(insertb), dataOffset+bucketCnt*8+inserti*uintptr(t.elemsize))
+```
+
+## insert
+
+```go
+m1 := make(map[int]string)
+m1[1] = "aaa"
+m1[3] = "ccc"
+m1[6] = "fff"
+m1[4] = "ddd"
+```
+![assign2](./assign2.png)
+
+The bucket is seperated to three region, same index among different region group together can represent a hash slot(`tophash[0] - key[0] - elem[0] ===> 1: "aaa"`)
+
+```go
+m1[2] = "bbb"
+m1[5] = "eee"
+m1[8] = "hhh"
+m1[7] = "ggg"
+```
+
+The key and value inserted in the same bucket are stored in insertion order
+
+![assign3](./assign3.png)
 
