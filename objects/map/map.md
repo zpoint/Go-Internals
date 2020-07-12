@@ -13,7 +13,12 @@
 * [tophash](#tophash)
 * [key and element](#key-and-element)
 * [insert](#insert)
-* [resize](#resize)
+
+[resize](#resize)
+
+* [hashGrow](#hashGrow)
+
+
 
 ## related file
 
@@ -162,3 +167,20 @@ The key and value inserted in the same bucket are stored in insertion order
 
 ![assign3](./assign3.png)
 
+```go
+m1[9] = "iii"
+```
+
+When there're no enough entry left in the following buckets and element count in the map achieve the load factor `hashGrow` function will be called when you try to insert another element
+
+`hashGrow` doubles the size of buckets if meet the following condition `(count > 6.5 * B)`
+
+```go
+func overLoadFactor(count int, B uint8) bool {
+   return count > bucketCnt && uintptr(count) > loadFactorNum*(bucketShift(B)/loadFactorDen)
+}
+```
+
+![assign4](./assign4.png)
+
+after malloc a new bucket array from go's memory management system, and set the `buckets` pointer points to the newly malloced address, set the `oldbuckets` points to the original buckets array, `hashGrow`'s work is done
