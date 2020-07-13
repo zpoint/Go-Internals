@@ -17,6 +17,10 @@
 [resize](#resize)
 
 * [hashGrow](#hashGrow)
+* [growWork](#growWork)
+* [overflow bucket](#overflow-bucket)
+
+[read more](#read-more)
 
 
 
@@ -114,7 +118,7 @@ buckets is the actual memory container that stores the **key** and **value**, th
 
 The next step is linear search, traverse the bucket and find an entry which is currently avaliable, take it
 
-If the current bucket is full, the linear search algorithm will cross the bucket boundary to the next bucket, and repeat the searching process
+If the current bucket is full, the linear search algorithm will cross the bucket boundary to the next [overflow bucket](#overflow-bucket), and repeat the searching process
 
 ### tophash
 
@@ -143,6 +147,8 @@ k := *((*uint64)(add(unsafe.Pointer(b), dataOffset+i*8)))
 elem := add(unsafe.Pointer(insertb), dataOffset+bucketCnt*8+inserti*uintptr(t.elemsize))
 ```
 
+The purpose is to avoid alignment when you pack key and element with different size together, which saves memory usage
+
 ## insert
 
 ```go
@@ -167,9 +173,13 @@ The key and value inserted in the same bucket are stored in insertion order
 
 ![assign3](./assign3.png)
 
+## resize
+
 ```go
 m1[9] = "iii"
 ```
+
+### hashGrow
 
 When there're no enough entry left in the following buckets and element count in the map achieve the load factor `hashGrow` function will be called when you try to insert another element
 
@@ -184,3 +194,17 @@ func overLoadFactor(count int, B uint8) bool {
 ![assign4](./assign4.png)
 
 after malloc a new bucket array from go's memory management system, and set the `buckets` pointer points to the newly malloced address, set the `oldbuckets` points to the original buckets array, `hashGrow`'s work is done
+
+### growWork
+
+In every assign and delete operation, it will checks whether the `rehash` is done, if not the `growWork` will be called, `growWork` will do a small step of real rehash operation, by amortizing the `rehash` operation,  `resize` only needs to malloc a new bucket array which makes the resize very efficent, The strategy's name is [incremental_resizing](https://en.wikipedia.org/wiki/Hash_table#Incremental_resizing) which is also used in [Redis hash internal](https://github.com/zpoint/Redis-Internals/blob/5.0/Object/hash/hash.md#resize) 
+
+
+
+### overflow bucket
+
+
+
+## read more
+
+* [macro view of map internals in go](https://www.ardanlabs.com/blog/2013/12/macro-view-of-map-internals-in-go.html)
