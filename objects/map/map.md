@@ -18,7 +18,12 @@
 
 * [hashGrow](#hashGrow)
 * [growWork](#growWork)
-* [overflow bucket](#overflow-bucket)
+
+[overflow bucket](#overflow-bucket)
+
+[delete](#delete)
+
+[concurrency](#concurrency)
 
 [read more](#read-more)
 
@@ -158,6 +163,7 @@ m1[3] = "ccc"
 m1[6] = "fff"
 m1[4] = "ddd"
 ```
+
 ![assign2](./assign2.png)
 
 The bucket is seperated to three region, same index among different region group together can represent a hash slot(`tophash[0] - key[0] - elem[0] ===> 1: "aaa"`)
@@ -197,11 +203,86 @@ after malloc a new bucket array from go's memory management system, and set the 
 
 ### growWork
 
-In every assign and delete operation, it will checks whether the `rehash` is done, if not the `growWork` will be called, `growWork` will do a small step of real rehash operation, by amortizing the `rehash` operation,  `resize` only needs to malloc a new bucket array which makes the resize very efficent, The strategy's name is [incremental_resizing](https://en.wikipedia.org/wiki/Hash_table#Incremental_resizing) which is also used in [Redis hash internal](https://github.com/zpoint/Redis-Internals/blob/5.0/Object/hash/hash.md#resize) 
+In every assign and delete operation, it will checks whether the `rehash` is done, if not the `growWork` will be called, `growWork` will do a small step of real rehash operation, by amortizing the `rehash` operation,  `resize` only needs to malloc a new bucket array which makes the resize very efficent, The strategy's name is [incremental resizing](https://en.wikipedia.org/wiki/Hash_table#Incremental_resizing) which is also used in [Redis hash implementation](https://github.com/zpoint/Redis-Internals/blob/5.0/Object/hash/hash.md#resize) 
+
+The current go runtime map calls `growWork` on every `assign` and `delete` operation, `growWork` will rehash the current bucket and the next top bucket, so each `assign` or `delete` operation will cause two buckets to be rehashed
+
+For example
+
+```go
+func main() {
+	m1 := make(map[int]string)
+	for i := 0; i < 26; i++ {
+		m1[i] = string(i)
+	}
+	fmt.Println("\n\n\nbr1\n\n\n")
+	m1[27] = "27"
+	fmt.Println("\n\n\nbr2\n\n\n")
+	m1[27] = "28"
+	fmt.Println("\n\n\nbr3\n\n\n")
+	m1[27] = "29"
+}
+```
+
+The layout in `br1`
+
+![resize](./resize.png)
+
+The assign operation `m1[27] = "27"` will do the following steps
+
+Malloc an array of buckets which is double size of the origin bucket array, and set the current `buckets` pointer points to the new bucket array,  the `oldbuckets` pointer points to the origin bucket array
+
+`B` becomes 3
+
+![resize1](./resize1.png)
 
 
 
-### overflow bucket
+Because the next key `27` 's hash result is in`bucket 3`, the `bucket 3` will be rehashed firstly
+
+The reset constant `evacuatedX` means
+
+>  key/elem is valid.  Entry has been evacuated to first half of larger table.
+
+`evacuatedY`  means
+
+> same as above, but evacuated to second half of larger table.
+
+`evacuatedEmpty` means
+
+> cell is empty, bucket is evacuated.
+
+![resize2](./resize2.png)
+
+The next top bucket `oldbuckets` pointer points to will be the next target to be rehashed
+
+Also key `27` will be inserted
+
+![resize3](./resize3.png)
+
+And `br2` is done, `growWork` will only rehash two buckets each time
+
+If we assign `m1` one more time, after `br2` before `br3`
+
+Because the inserted key's hash value is located in old `bmap(3)` and old `bmap(3)` is already rehashed, we will only rehash the next top unevacuted bucket in `oldbuckets`
+
+![resize4](./resize4.png)
+
+So does the assignment after `br3`
+
+![resize5](./resize5.png)
+
+Because after the assignment after `br3`, all buckets in `oldbuckets` are evacuted, the whole rehash procedure is done
+
+
+
+## overflow bucket
+
+
+
+## delete
+
+##concurrency
 
 
 
