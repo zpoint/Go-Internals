@@ -96,7 +96,7 @@ This is our example
 
 ![assign1](./assign1.png)
 
-We can find that `count` stores how many elements currently stored inside the `map` so that `len(m1)` can be calculated in `O(1)` 
+We can find that `count` represents how many elements currently stored inside the `map` so that `len(m1)` can be calculated in `O(1)` 
 
 `flags` is used for indicating the state of current map
 
@@ -109,13 +109,11 @@ sameSizeGrow = 8 // the current map growth is to a new map of the same size
 
 `B` is bucket count in log2 format
 
-`noverflow # TO DO`
+`noverflow` means how many [overflow buckets](#overflow-bucket) we currently have
 
 `buckets` is a pointer which points to the head of current buckets
 
-`nevacuate # TO DO`
-
-`extra # TO DO`
+`nevacuate` means how many buckets have been rehashed during the [resize](#resize) process
 
 ## buckets
 
@@ -166,7 +164,7 @@ m1[4] = "ddd"
 
 ![assign2](./assign2.png)
 
-The bucket is seperated to three region, same index among different region group together can represent a hash slot(`tophash[0] - key[0] - elem[0] ===> 1: "aaa"`)
+The bucket is seperated to three region(actually one more pointer in the tail of the bucket), same index among different region group together can represent a hash slot(`tophash[0] - key[0] - elem[0] ===> 1: "aaa"`)
 
 ```go
 m1[2] = "bbb"
@@ -291,7 +289,7 @@ func main() {
 }
 ```
 
-For illustration purpose, I've altered the source code the take the key as an integer for hash value instead of take the pointer address as hash value
+For illustration purpose, I've altered the source code the take the key as an integer for hash value instead of take the pointer address and a hash seed as hash value
 
 ![overflow](./overflow.png)
 
@@ -299,7 +297,7 @@ We can find that if the bucket is full and there're new key hashed to same bucke
 
 The address is not contiguous so it becomes a linked list
 
-The actual hash key is the pointer address instead of value in key, combined with a random hash seed, it's not likely to make an array of hash buckets become linked list like the above diagram
+The actual hash key takes pointer address instead of value in key, combined with a random hash seed, it's not likely to make an array of hash buckets become linked list like the above diagram
 
 ## delete
 
@@ -339,7 +337,7 @@ if h.flags&hashWriting != 0 {
 
 So, concurrent read is ok since the `access` does not change anything, but concurrent write or concurrent read and write is not ok, because you may see a structure in the middle of change
 
-The [incremental resizing](https://en.wikipedia.org/wiki/Hash_table#Incremental_resizing) does not implement the change in `access` operation like [Redis hash](https://github.com/zpoint/Redis-Internals/blob/5.0/Object/hash/hash.md#resize) to support concurrent read,  [Redis](https://github.com/zpoint/Redis-Internals/blob/5.0/Object/hash/hash.md#resize) only modify hash data inside a single server loop, which does not have the concurrency problem
+In order to support concurrent read, the [incremental resizing](https://en.wikipedia.org/wiki/Hash_table#Incremental_resizing) does not implement the change in `access` operation like [Redis hash](https://github.com/zpoint/Redis-Internals/blob/5.0/Object/hash/hash.md#resize),  [Redis](https://github.com/zpoint/Redis-Internals/blob/5.0/Object/hash/hash.md#resize) only modify hash data inside a single server loop, which does not have the concurrency problem
 
 If you need concurrency read and write, please refer to [sync.map](https://golang.org/pkg/sync/#Map)
 
