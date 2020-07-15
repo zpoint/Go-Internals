@@ -24,7 +24,7 @@ I am new to [go](https://github.com/golang/go) , I will try my best to keep the 
 
 # Objects
 
-- [ ] [map](https://github.com/zpoint/go-Internals/blob/1.14/objects/map/map.md)
+- [x] [map](https://github.com/zpoint/go-Internals/blob/1.14/objects/map/map.md)
 - [ ] [channel](https://github.com/zpoint/go-Internals/blob/1.14/objects/channel/channel.md)
 
 # Runtime

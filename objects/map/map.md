@@ -272,20 +272,78 @@ So does the assignment after `br3`
 
 ![resize5](./resize5.png)
 
-Because after the assignment after `br3`, all buckets in `oldbuckets` are evacuted, the whole rehash procedure is done
+Because after the assignment after `br3`, all buckets in `oldbuckets` are evacuted, the `oldbuckets` pointer will be reset and `oldbuckets` can be handled by gc
 
+After that, the whole rehash procedure is done
 
+![resize6](./resize6.png)
 
 ## overflow bucket
 
+The bucket size is a compile time constant(8 by default), what if there're more than 8 keys hashed to same buckets ?
 
+```go
+func main() {
+   m1 := make(map[int]string)
+   for i := 0; i < 26; i++ {
+      m1[i*4] = string(i)
+   }
+}
+```
+
+For illustration purpose, I've altered the source code the take the key as an integer for hash value instead of take the pointer address as hash value
+
+![overflow](./overflow.png)
+
+We can find that if the bucket is full and there're new key hashed to same bucket, the tail of the bucket stores a pointer, which points to a new bucket
+
+The address is not contiguous so it becomes a linked list
+
+The actual hash key is the pointer address instead of value in key, combined with a random hash seed, it's not likely to make an array of hash buckets become linked list like the above diagram
 
 ## delete
 
-##concurrency
+When you delete entry from `map`, the flag in `bucket[hash].tophash[i]` will be marked as empty, so that you can reuse this block in the next insertion 
 
+```go
+for i := 0; i < 26; i++ {
+   delete(m1, i*4)
+}
+```
 
+![delete](./delete.png)
+
+`tophash` will be reset to empty flag
+
+Because `int` is  a special kind of `key`, it's stored as plain value inside the `key` slots, while `string` stored as pointer in `elem` slots
+
+`key` leave unchanged
+
+`elem` will be reset and gc will handle them
+
+## concurrency
+
+There's a flag `hashWriting` represents whether
+
+> a goroutine is writing to the map
+
+In `assign` and `delete` operation, the `flag` will be set(also will be checked)
+
+In `access` operation, the `flag` will be checked
+
+```go
+if h.flags&hashWriting != 0 {
+   throw("concurrent map read and map write")
+}
+```
+
+So, concurrent read is ok since the `access` does not change anything, but concurrent write or concurrent read and write is not ok, because you may see a structure in the middle of change
+
+The [incremental resizing](https://en.wikipedia.org/wiki/Hash_table#Incremental_resizing) does not implement the change in `access` operation like [Redis hash](https://github.com/zpoint/Redis-Internals/blob/5.0/Object/hash/hash.md#resize) to support concurrent read,  [Redis](https://github.com/zpoint/Redis-Internals/blob/5.0/Object/hash/hash.md#resize) only modify hash data inside a single server loop, which does not have the concurrency problem
+
+If you need concurrency read and write, please refer to [sync.map](https://golang.org/pkg/sync/#Map)
 
 ## read more
 
 * [macro view of map internals in go](https://www.ardanlabs.com/blog/2013/12/macro-view-of-map-internals-in-go.html)
+
