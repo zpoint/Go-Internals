@@ -1,4 +1,4 @@
-# map
+# map![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals%2F/map_cn)
 
 ## 目录
 
@@ -201,9 +201,7 @@ func overLoadFactor(count int, B uint8) bool {
 
 ### growWork
 
-在每一次赋值和删除操作时, map 会检查当前的 `rehash` 是否已经完成, 如果没有的话, `growWork` 会被调用, `growWork` 在每次调时会做一小部分 `rehash` 操作, 把 `rehash` 操作分摊到后面的每次修改中, 扩容时只需要申请一个新的桶数组即可, 这样可以保持扩容时的高效, 这个策略叫做 
-
-In every assign and delete operation, it will checks whether the `rehash` is done, if not the `growWork` will be called, `growWork` will do a small step of real rehash operation, by amortizing the `rehash` operation,  `resize` only needs to malloc a new bucket array which makes the resize very efficent, The strategy's name is [渐进式扩容](https://en.wikipedia.org/wiki/Hash_table#Incremental_resizing) 并且 [Redis hash 实现](https://github.com/zpoint/Redis-Internals/blob/5.0/Object/hash/hash_cn.md#resize) 中也同样使用了这个策略
+在每一次赋值和删除操作时, map 会检查当前的 `rehash` 是否已经完成, 如果没有的话, `growWork` 会被调用, `growWork` 在每次调时会做一小部分 `rehash` 操作, 把 `rehash` 操作分摊到后面的每次修改中, 扩容时只需要申请一个新的桶数组即可, 这样可以保持扩容时的高效, 这个策略叫做 [渐进式扩容](https://en.wikipedia.org/wiki/Hash_table#Incremental_resizing) , 并且 [Redis hash 实现](https://github.com/zpoint/Redis-Internals/blob/5.0/Object/hash/hash_cn.md#resize) 中也同样使用了这个策略
 
 当前的 go 运行时会在每次 `assign` 和 `delete` 操作时调用 `growWork`, `growWork` 会 rehash 当前需要用到的桶和下一个旧的桶数组中头部的桶, 所以每一次 `assign` 和 `delete` 操作都会触发 2 个桶的 rehash
 
