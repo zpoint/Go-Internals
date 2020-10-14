@@ -1,5 +1,5 @@
-# go-Internals![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals)
-* [简体中文](https://github.com/zpoint/go-Internals/blob/1.14/README_CN.md)
+# Go-Internals![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals)
+* [简体中文](https://github.com/zpoint/Go-Internals/blob/1.14/README_CN.md)
 * **Watch** this repo if you need to be notified when there's update
 
 This repository is my notes/blog for [go](https://github.com/golang/go) source code
@@ -20,15 +20,15 @@ I am new to [go](https://github.com/golang/go) , I will try my best to keep the 
 
 # Debug
 
-- [x] [setup(build other go from source  code and add a print call to runtime package)](https://github.com/zpoint/go-Internals/blob/1.14/debug/setup/setup.md)
+- [x] [setup(build other go from source  code and add a print call to runtime package)](https://github.com/zpoint/Go-Internals/blob/1.14/debug/setup/setup.md)
 
 # Objects
 
-- [x] [map](https://github.com/zpoint/go-Internals/blob/1.14/objects/map/map.md)
-- [ ] [channel](https://github.com/zpoint/go-Internals/blob/1.14/objects/channel/channel.md)
+- [x] [map](https://github.com/zpoint/Go-Internals/blob/1.14/objects/map/map.md)
+- [ ] [channel](https://github.com/zpoint/Go-Internals/blob/1.14/objects/channel/channel.md)
 
 # Runtime
 
-- [ ] [goroutine](https://github.com/zpoint/go-Internals/blob/1.14/runtime/goroutine/goroutine.md)
+- [ ] [goroutine](https://github.com/zpoint/Go-Internals/blob/1.14/runtime/goroutine/goroutine.md)
 
-- [ ] [gc](https://github.com/zpoint/go-Internals/blob/1.14/runtime/gc/gc.md)
+- [ ] [gc](https://github.com/zpoint/Go-Internals/blob/1.14/runtime/gc/gc.md)

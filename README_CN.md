@@ -1,5 +1,5 @@
-# go-Internals![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals-CN)
-* [简体中文](https://github.com/zpoint/CPython-Internals/blob/master/README_CN.md)
+# Go-Internals![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals-CN)
+* [English](https://github.com/zpoint/Go-Internals)
 * 如果你需要接收更新通知, 点击右上角的 **Watch**, 当有文章更新时会在 issue 发布相关标题和链接
 
 这个仓库是本人分析 [go](https://github.com/golang/go) 源码的时候做的记录/博客
@@ -22,16 +22,16 @@ git reset --hard dd150176c3cc49da68c8179f740eadc79404d351
 
 # Debug
 
-- [x] [setup(编译安装额外版本/runtime包中增加print函数调用)](https://github.com/zpoint/go-Internals/blob/1.14/debug/setup/setup_cn.md)
+- [x] [setup(编译安装额外版本/runtime包中增加print函数调用)](https://github.com/zpoint/Go-Internals/blob/1.14/debug/setup/setup_cn.md)
 
 # Objects
 
-- [x] [map](https://github.com/zpoint/go-Internals/blob/1.14/objects/map/map_cn.md)
-- [ ] [channel](https://github.com/zpoint/go-Internals/blob/1.14/objects/channel/channel_cn.md)
+- [x] [map](https://github.com/zpoint/Go-Internals/blob/1.14/objects/map/map_cn.md)
+- [ ] [channel](https://github.com/zpoint/Go-Internals/blob/1.14/objects/channel/channel_cn.md)
 
 # Runtime
 
-[goroutine](https://github.com/zpoint/go-Internals/blob/1.14/runtime/goroutine/goroutine_cn.md)
+[goroutine](https://github.com/zpoint/Go-Internals/blob/1.14/runtime/goroutine/goroutine_cn.md)
 
-[gc](https://github.com/zpoint/go-Internals/blob/1.14/runtime/gc/gc_cn.md)
+[gc](https://github.com/zpoint/Go-Internals/blob/1.14/runtime/gc/gc_cn.md)
 
