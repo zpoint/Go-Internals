@@ -33,7 +33,7 @@ We have already installed a go
 % brew install go
 ...
 % go version
-go version go1.14.4 darwin/amd64
+go version go1.15.2 darwin/amd64
 ```
 
 And we need to build a new one from source
@@ -41,7 +41,7 @@ And we need to build a new one from source
 ```bash
 % git clone https://github.com/golang/go.git
 % cd go
-% git reset --hard dd150176c3cc49da68c8179f740eadc79404d351
+% git reset --hard d317ba5d4489c1ef53d3077afbff30eb72d7d3b0
 % cd src
 % vim all.bash
 ```
@@ -85,7 +85,7 @@ Add the specific version to `~/.zshenv`(or `~/.bash_profile` depends on your she
 alias go_dev=/Users/zpoint/Desktop/go/bin/go
 % source ~/.zshenv
 % go_dev version
-go version devel +dd150176c3 Fri Jul 3 03:31:29 2020 +0000 darwin/amd64
+go version devel +d317ba5d44 Sat Oct 10 00:55:54 2020 +0000 darwin/amd64
 % which go_dev
 go_dev: aliased to /Users/zpoint/Desktop/go/bin/go
 % go_dev env GOROOT

@@ -5,12 +5,10 @@
 This repository is my notes/blog for [go](https://github.com/golang/go) source code
 
 ```shell script
-# based on the current master branch which is 1.14
+# based on the current master branch which is 1.15
 cd go
-git reset --hard dd150176c3cc49da68c8179f740eadc79404d351
+git reset --hard d317ba5d4489c1ef53d3077afbff30eb72d7d3b0
 ```
-
-I am new to [go](https://github.com/golang/go) , I will try my best to keep the contents in this repo the same style as [CPython-Internals](https://github.com/zpoint/CPython-Internals) and [Redis-Internals](https://github.com/zpoint/Redis-Internals)
 
 # Table of Contents
 
