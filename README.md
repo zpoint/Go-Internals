@@ -1,5 +1,5 @@
 # Go-Internals![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals)
-* [简体中文](https://github.com/zpoint/Go-Internals/blob/1.14/README_CN.md)
+* [简体中文](https://github.com/zpoint/Go-Internals/blob/1.15/README_CN.md)
 * **Watch** this repo if you need to be notified when there's update
 
 This repository is my notes/blog for [go](https://github.com/golang/go) source code
@@ -22,11 +22,11 @@ git reset --hard d317ba5d4489c1ef53d3077afbff30eb72d7d3b0
 
 # Objects
 
-- [x] [map](https://github.com/zpoint/Go-Internals/blob/1.14/objects/map/map.md)
-- [ ] [channel](https://github.com/zpoint/Go-Internals/blob/1.14/objects/channel/channel.md)
+- [x] [map](https://github.com/zpoint/Go-Internals/blob/1.15/objects/map/map.md)
+- [ ] [channel](https://github.com/zpoint/Go-Internals/blob/1.15/objects/channel/channel.md)
 
 # Runtime
 
-- [ ] [goroutine](https://github.com/zpoint/Go-Internals/blob/1.14/runtime/goroutine/goroutine.md)
+- [ ] [goroutine](https://github.com/zpoint/Go-Internals/blob/1.15/runtime/goroutine/goroutine.md)
 
-- [ ] [gc](https://github.com/zpoint/Go-Internals/blob/1.14/runtime/gc/gc.md)
+- [ ] [gc](https://github.com/zpoint/Go-Internals/blob/1.15/runtime/gc/gc.md)
