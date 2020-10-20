@@ -12,6 +12,10 @@
 
 [recv](#recv)
 
+[select](#select)
+
+[example](#example)
+
 [read more](#read-more)
 
 
@@ -96,4 +100,27 @@ The procedure to `chanrecv` is similar to the procedure of `chansend`
 First acquire the `lock`, try to pop an element and receive from a goroutine if there exist a goroutine in `sendq`, if `sendq` is empty, try to receive element from the circular queue, otherwise block the current running goroutine
 
 ![chanrecv](./chanrecv.png)
+
+## select
+
+## example
+
+```go
+package main
+
+func example() {
+	c := make(chan int, 5)
+	for i := 0; i < 5; i++ {
+		c <- i
+	}
+}
+
+func main() {
+	example()
+}
+```
+
+![example](./example.png)
+
+This is the state after running `example`, `dataqsiz` is 5 indicate there are 5 item in the queue
 
