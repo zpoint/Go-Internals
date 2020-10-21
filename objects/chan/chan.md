@@ -16,6 +16,9 @@
 
 [example](#example)
 
+* [sendq and recvq](#sendq-and-recvq)
+* [sendx and recvx](#sendx-and-recvx)
+
 [read more](#read-more)
 
 
@@ -34,7 +37,7 @@
 
 `buf` points to the beginning of the circular queue
 
-`elemsize` is the size(in bytes) of element number currently in the channel
+`elemsize` is the size(in bytes) of element
 
 `closed` indicate whether the channel is closed
 
@@ -105,22 +108,96 @@ First acquire the `lock`, try to pop an element and receive from a goroutine if 
 
 ## example
 
+### sendq and recvq
+
 ```go
 package main
 
-func example() {
-	c := make(chan int, 5)
+var c chan int = make(chan int, 5)
+
+func main() {
 	for i := 0; i < 5; i++ {
 		c <- i
 	}
 }
 
-func main() {
-	example()
-}
 ```
 
 ![example](./example.png)
 
-This is the state after running `example`, `dataqsiz` is 5 indicate there are 5 item in the queue
+This is the state after running `example`, `dataqsiz` is 5 indicate there are 5 item in the queue, `buf` points to the beginning of thd element's memory block, `elemsize` is 8, which is size of `int` in golang in my machine
 
+`closed` indicate whether the channel is closed
+
+If we send one more time
+
+```go
+c <- 6
+```
+
+![example2](./example2.png)
+
+The current goroutine will block and added to the wait queue in `sendq`, and the value pointer is attached to the current goroutine, stored inside the `sudog` structure
+
+If we add one more sender
+
+```go
+package main
+
+import "time"
+
+var c chan int = make(chan int, 5)
+
+func send() {
+	time.Sleep(2 * time.Second)
+	c <- 7
+}
+
+func main() {
+	go send()
+	for i := 0; i < 5; i++ {
+		c <- i
+	}
+	c <- 6
+}
+```
+
+![example3](./example3.png)
+
+The `recvq` has the same structure as `sendq`, while it stores all the goroutines blocking in receiving from the channel
+
+### sendx and recvx
+
+If we run the following new example
+
+```go
+package main
+
+var c chan int = make(chan int, 5)
+
+func main() {
+	for i := 0; i < 5; i++ {
+		c <- i
+	}
+	// break point 1
+	<- c
+	<- c
+	// break point 2
+	c <- 6
+	c <- 7
+  // break point 3
+}
+
+```
+
+In `break point 1`, the situation is the same as the initial state in [example](#example)
+
+![breakpoint1](./breakpoint1.png)
+
+In `break point 2`, the `recvx` is moved forward by 2, while `sendx` remains the same, `qcount` becomes 3
+
+![breakpoint2](./breakpoint2.png)
+
+In `break point 3`， the `recvx` also moved forawrd 2, `qcount` becomes 5， the channel becomes full
+
+![breakpoint3](./breakpoint3.png)
