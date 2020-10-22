@@ -1,4 +1,4 @@
-# Chan
+# chan
 
 ## contents
 
@@ -19,8 +19,6 @@
 * [sendq and recvq](#sendq-and-recvq)
 * [sendx and recvx](#sendx-and-recvx)
 
-[read more](#read-more)
-
 
 
 ## related file
@@ -31,11 +29,11 @@
 
 ![hchan](./hchan.png)
 
-`qcount` stores total data count in the queue
+`qcount` stores total data count in the queue(current size)
 
-`dataqsiz` is the size of circular queue
+`dataqsiz` is the size of circular queue(max size)
 
-`buf` points to the beginning of the circular queue
+`buf` points to the beginning of the circular queue memory block
 
 `elemsize` is the size(in bytes) of element
 
@@ -43,9 +41,9 @@
 
 we leave `sendx` and `recvx` for later illustration
 
-`recvq` is a receiver queue
+`recvq` is a goroutine receiver queue
 
-`sendq` is a sender queue
+`sendq` is a goroutine sender queue
 
 `lock` is used for protection of the `hchan` data structure
 
@@ -57,20 +55,20 @@ different memory allocation path will be called for different data size
 
 ```go
 	switch {
-	case mem == 0:
-		// Queue or element size is zero.
-		c = (*hchan)(mallocgc(hchanSize, nil, true))
-		// Race detector uses this location for synchronization.
-		c.buf = c.raceaddr()
-	case elem.ptrdata == 0:
-		// Elements do not contain pointers.
-		// Allocate hchan and buf in one call.
-		c = (*hchan)(mallocgc(hchanSize+mem, nil, true))
-		c.buf = add(unsafe.Pointer(c), hchanSize)
-	default:
-		// Elements contain pointers.
-		c = new(hchan)
-		c.buf = mallocgc(mem, elem, true)
+    case mem == 0:
+      // Queue or element size is zero.
+      c = (*hchan)(mallocgc(hchanSize, nil, true))
+      // Race detector uses this location for synchronization.
+      c.buf = c.raceaddr()
+    case elem.ptrdata == 0:
+      // Elements do not contain pointers.
+      // Allocate hchan and buf in one call.
+      c = (*hchan)(mallocgc(hchanSize+mem, nil, true))
+      c.buf = add(unsafe.Pointer(c), hchanSize)
+    default:
+      // Elements contain pointers.
+      c = new(hchan)
+      c.buf = mallocgc(mem, elem, true)
 	}
 ```
 
@@ -84,7 +82,7 @@ func chansend1(c *hchan, elem unsafe.Pointer) {
 }
 ```
 
-The `chansend` will acquire the `lock`, try to pop an element and send to a goroutine if there exist a goroutine in `recvq`, if `recvq` is empty, try to store the element in the circular queue, otherwise block the current running goroutine
+The `chansend` will acquire the `lock`, try to pop an element and send to a goroutine if there exist a goroutine in `recvq`, if `recvq` is empty, try to store the element in the circular queue, otherwise add the current goroutine to `sendq` and block the current running goroutine(a parameter `block` controls whether the current goroutine will be blocked, currently it's `true`)
 
 ![chansend](./chansend.png)
 
@@ -98,13 +96,86 @@ func chanrecv1(c *hchan, elem unsafe.Pointer) {
 }
 ```
 
-The procedure to `chanrecv` is similar to the procedure of `chansend`
+The procedure of `chanrecv` is similar to the procedure of `chansend`
 
-First acquire the `lock`, try to pop an element and receive from a goroutine if there exist a goroutine in `sendq`, if `sendq` is empty, try to receive element from the circular queue, otherwise block the current running goroutine
+First acquire the `lock`, try to pop an element and receive from a goroutine if there exist a goroutine in `sendq`, if `sendq` is empty, try to receive element from the circular queue, otherwise add the current goroutine to `recvq` and block the current running goroutine(a parameter `block` controls whether the current goroutine will be blocked, currently it's `true`)
 
 ![chanrecv](./chanrecv.png)
 
 ## select
+
+select is implemented as the follow two function
+
+```go
+// compiler implements
+//
+//	select {
+//	case v = <-c:
+//		... foo
+//	default:
+//		... bar
+//	}
+//
+// as
+//
+//	if selectnbrecv(&v, c) {
+//		... foo
+//	} else {
+//		... bar
+//	}
+//
+func selectnbsend(c *hchan, elem unsafe.Pointer) (selected bool) {
+	return chansend(c, elem, false, getcallerpc())
+}
+
+// compiler implements
+//
+//	select {
+//	case v, ok = <-c:
+//		... foo
+//	default:
+//		... bar
+//	}
+//
+// as
+//
+//	if c != nil && selectnbrecv2(&v, &ok, c) {
+//		... foo
+//	} else {
+//		... bar
+//	}
+//
+func selectnbrecv(elem unsafe.Pointer, c *hchan) (selected bool) {
+	selected, _ = chanrecv(c, elem, false)
+	return
+}
+```
+
+select send and select receive calls the same function as [send](#send) and [recv](#recv), except that the `block` parameter is `false` instead of `true`
+
+```go
+func chanrecv(c *hchan, ep unsafe.Pointer, block bool) (selected, received bool) {
+	// ...
+  	if !block {
+			unlock(&c.lock)
+			return false, false
+	}
+  // ...
+}
+
+func chansend(c *hchan, ep unsafe.Pointer, block bool, callerpc uintptr) bool {
+  // ...
+  	if !block {
+			unlock(&c.lock)
+			return false
+	}
+  // ...
+}
+```
+
+`chanrecv` and `chansend` both check the `block` parameter to see if it needs to block the current goroutine
+
+
 
 ## example
 
@@ -125,7 +196,7 @@ func main() {
 
 ![example](./example.png)
 
-This is the state after running `example`, `dataqsiz` is 5 indicate there are 5 item in the queue, `buf` points to the beginning of thd element's memory block, `elemsize` is 8, which is size of `int` in golang in my machine
+This is the state after running `example`, `dataqsiz` is 5 indicate there are 5 item in the queue, `buf` points to the beginning of the element's memory block, `elemsize` is 8, which is size of `int` in golang in my machine
 
 `closed` indicate whether the channel is closed
 
@@ -185,7 +256,7 @@ func main() {
 	// break point 2
 	c <- 6
 	c <- 7
-  // break point 3
+	// break point 3
 }
 
 ```
@@ -201,3 +272,4 @@ In `break point 2`, the `recvx` is moved forward by 2, while `sendx` remains the
 In `break point 3`， the `recvx` also moved forawrd 2, `qcount` becomes 5， the channel becomes full
 
 ![breakpoint3](./breakpoint3.png)
+
