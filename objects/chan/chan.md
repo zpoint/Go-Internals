@@ -1,4 +1,4 @@
-# chan
+# chan![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals%2F/objects/chan)
 
 ## contents
 
@@ -235,7 +235,7 @@ func main() {
 
 ![example3](./example3.png)
 
-The `recvq` has the same structure as `sendq`, while it stores all the goroutines blocking in receiving from the channel
+The `recvq` has the same structure as `sendq`, while it stores all the goroutines blocking in receiving state from the channel
 
 ### sendx and recvx
 
@@ -261,7 +261,7 @@ func main() {
 
 ```
 
-In `break point 1`, the situation is the same as the initial state in [example](#example)
+In `break point 1`, the state is the same as the initial state in [example](#example)
 
 ![breakpoint1](./breakpoint1.png)
 
@@ -269,7 +269,7 @@ In `break point 2`, the `recvx` is moved forward by 2, while `sendx` remains the
 
 ![breakpoint2](./breakpoint2.png)
 
-In `break point 3`， the `recvx` also moved forawrd 2, `qcount` becomes 5， the channel becomes full
+In `break point 3`， the `sendx` also moved forawrd 2, `qcount` becomes 5， the channel becomes full
 
 ![breakpoint3](./breakpoint3.png)
 

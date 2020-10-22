@@ -1,4 +1,4 @@
-# chan
+# chan![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals%2F/objects/chan_cn)
 
 ## 目录
 
@@ -233,11 +233,11 @@ func main() {
 
 ![example3](./example3.png)
 
-The `recvq` has the same structure as `sendq`, while it stores all the goroutines blocking in receiving from the channel
+ `recvq` 和 `sendq` 的结构相同, 但是它存储的是所有阻塞在接收状态中的 goroutine 队列
 
 ### sendx 和 recvx
 
-If we run the following new example
+如果我们运行如下的示例
 
 ```go
 package main
@@ -259,15 +259,15 @@ func main() {
 
 ```
 
-In `break point 1`, the situation is the same as the initial state in [example](#example)
+在 `break point 1`, 状态和 [示例](#示例) 开始时相似
 
 ![breakpoint1](./breakpoint1.png)
 
-In `break point 2`, the `recvx` is moved forward by 2, while `sendx` remains the same, `qcount` becomes 3
+在 `break point 2`, `recvx` 往前移了 2 个位置,  `sendx` 保持不变, `qcount` 变成了 3
 
 ![breakpoint2](./breakpoint2.png)
 
-In `break point 3`， the `recvx` also moved forawrd 2, `qcount` becomes 5， the channel becomes full
+在 `break point 3`，`sendx` 也往前移动了 2 个位置,  `qcount` 变成了 5, 此时通道的元素存满了
 
 ![breakpoint3](./breakpoint3.png)
 

@@ -1,4 +1,4 @@
-# map![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals%2F/map)
+# map![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals%2F/objects/map)
 
 ## contents
 
