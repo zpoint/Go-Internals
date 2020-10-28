@@ -54,22 +54,22 @@
 对于不同的元素大小, 会使用不同的内存分配策略
 
 ```go
-	switch {
+switch {
     case mem == 0:
-      // 队列或者元素大小为 0
-      c = (*hchan)(mallocgc(hchanSize, nil, true))
-      // 在这个位置进行竞争同步
-      c.buf = c.raceaddr()
+        // 队列或者元素大小为 0
+        c = (*hchan)(mallocgc(hchanSize, nil, true))
+        // 在这个位置进行竞争同步
+        c.buf = c.raceaddr()
     case elem.ptrdata == 0:
-      // 元素结构不包含指针
-      // 通过一次分配获得 hchan 和 buf 所需的空间
-      c = (*hchan)(mallocgc(hchanSize+mem, nil, true))
-      c.buf = add(unsafe.Pointer(c), hchanSize)
+        // 元素结构不包含指针
+        // 通过一次分配获得 hchan 和 buf 所需的空间
+        c = (*hchan)(mallocgc(hchanSize+mem, nil, true))
+        c.buf = add(unsafe.Pointer(c), hchanSize)
     default:
-      // 元素结构包含指针
-      c = new(hchan)
-      c.buf = mallocgc(mem, elem, true)
-	}
+        // 元素结构包含指针
+        c = new(hchan)
+        c.buf = mallocgc(mem, elem, true)
+}
 ```
 
 # send

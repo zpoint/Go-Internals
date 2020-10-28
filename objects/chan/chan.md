@@ -54,23 +54,27 @@ the creation of channel will finally call `makechan` in `src/runtime/chan.go`
 different memory allocation path will be called for different data size
 
 ```go
-	switch {
+switch {
     case mem == 0:
-      // Queue or element size is zero.
-      c = (*hchan)(mallocgc(hchanSize, nil, true))
-      // Race detector uses this location for synchronization.
-      c.buf = c.raceaddr()
+        // Queue or element size is zero.
+        c = (*hchan)(mallocgc(hchanSize, nil, true))
+        // Race detector uses this location for synchronization.
+        c.buf = c.raceaddr()
     case elem.ptrdata == 0:
-      // Elements do not contain pointers.
-      // Allocate hchan and buf in one call.
-      c = (*hchan)(mallocgc(hchanSize+mem, nil, true))
-      c.buf = add(unsafe.Pointer(c), hchanSize)
+        // Elements do not contain pointers.
+        // Allocate hchan and buf in one call.
+        c = (*hchan)(mallocgc(hchanSize+mem, nil, true))
+        c.buf = add(unsafe.Pointer(c), hchanSize)
     default:
-      // Elements contain pointers.
-      c = new(hchan)
-      c.buf = mallocgc(mem, elem, true)
-	}
+        // Elements contain pointers.
+        c = new(hchan)
+        c.buf = mallocgc(mem, elem, true)
+}
 ```
+
+
+
+
 
 # send
 
