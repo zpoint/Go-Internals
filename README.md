@@ -27,6 +27,6 @@ git reset --hard d317ba5d4489c1ef53d3077afbff30eb72d7d3b0
 
 # Runtime
 
-- [ ] [goroutine](https://github.com/zpoint/Go-Internals/blob/1.15/runtime/goroutine/goroutine.md)
-
+- [x] goroutine
+	- [x] [overview and schedule](https://github.com/zpoint/Go-Internals/blob/1.15/runtime/goroutine/goroutine.md)
 - [ ] [gc](https://github.com/zpoint/Go-Internals/blob/1.15/runtime/gc/gc.md)
