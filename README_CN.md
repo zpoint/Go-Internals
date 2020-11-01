@@ -31,8 +31,6 @@ git reset --hard d317ba5d4489c1ef53d3077afbff30eb72d7d3b0
 
 # Runtime
 
-goroutine
-
 - [x] goroutine
 	- [x] [概览与调度](https://github.com/zpoint/Go-Internals/blob/1.15/runtime/goroutine/goroutine_cn.md)
 - [ ] [gc](https://github.com/zpoint/Go-Internals/blob/1.15/runtime/gc/gc_cn.md)
