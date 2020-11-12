@@ -2,7 +2,15 @@
 
 # contents
 
+[related file](#related-file)
+
 [read more](#read-more)
+
+# related file
+
+* src/runtime/mgc.go
+
+
 
 # read more
 
