@@ -18,7 +18,7 @@ git reset --hard d317ba5d4489c1ef53d3077afbff30eb72d7d3b0
 
 # Debug
 
-- [x] [setup(build other go from source  code and add a print call to runtime package)](https://github.com/zpoint/Go-Internals/blob/1.14/debug/setup/setup.md)
+- [x] [setup(build other go from source  code and add a print call to runtime package)](https://github.com/zpoint/Go-Internals/blob/1.15/debug/setup/setup.md)
 
 # Objects
 

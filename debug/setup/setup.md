@@ -49,7 +49,7 @@ And we need to build a new one from source
 Comment the 13th line, and you won't run the test case which may take about 5 minutes each time you build from source, Because I will change the source code and rebuild frequently, I comment this line
 
 ```bash
-. ./make.bash "$@" --no-banner
+./make.bash "$@" --no-banner
 # bash run.bash --no-rebuild
 ```
 

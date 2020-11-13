@@ -49,7 +49,7 @@ go version go1.14.4 darwin/amd64
 因为我需要频繁的修改源代码, 并且目的是观察输出而不是开发功能模块, 所以我把第 13 行注释掉了, 这样每次构建时, 不需要重新跑一遍测试脚本(大概耗时5分钟)
 
 ```bash
-. ./make.bash "$@" --no-banner
+./make.bash "$@" --no-banner
 # bash run.bash --no-rebuild
 ```
 

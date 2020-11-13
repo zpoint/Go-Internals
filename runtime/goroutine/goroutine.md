@@ -35,7 +35,7 @@ According to the above article and comment in Go source code
 >
 > A Goroutine is essentially a [Coroutine](https://en.wikipedia.org/wiki/Coroutine) but this is Go, so we replace the letter “C” with a “G” and we get the word Goroutine. You can think of Goroutines as application-level threads and they are similar to OS Threads in many ways. Just as OS Threads are context-switched on and off a core, Goroutines are context-switched on and off an M.
 
-![mpg](/Users/zpoint/Desktop/Go-Internals/runtime/goroutine/mpg.png)
+![mpg](./mpg.png)
 
 Above picture comes from [scheduling-in-go-part2](https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part2.html)
 
