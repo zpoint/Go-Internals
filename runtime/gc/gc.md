@@ -33,7 +33,7 @@ func main() {
 
 ```
 
-If we inspect the `file.s`, we can learn that `new(int)` will call `runtime.newobject` by comipler, follow the function definition in `runtime.newobject`, we can find that a resource named `span` 
+If we inspect the `file.s`, we can learn that `new(int)` will call `runtime.newobject` by comipler, follow the function definition in `runtime.newobject`, we can find that a resource named `span` will be selected and the memory space required by the type will be allocated from the span, and the span wil mark the object inside it's structure in a bitmap, so that gc can track which object is allocated by inspecting the span
 
 # read more
 
