@@ -67,7 +67,7 @@ The `schedule` function is defined in `src/runtime/proc.go`
 // One round of scheduler: find a runnable goroutine and execute it.
 // Never returns.
 func schedule() {
-		// ...
+  	// ...
   	if gp == nil && gcBlackenEnabled != 0 {
 		gp = gcController.findRunnableGCWorker(_g_.m.p.ptr())
 		tryWakeP = tryWakeP || gp != nil
@@ -80,18 +80,18 @@ func schedule() {
 			lock(&sched.lock)
 			gp = globrunqget(_g_.m.p.ptr(), 1)
 			unlock(&sched.lock)
+			}
 		}
-	}
-	if gp == nil {
-		gp, inheritTime = runqget(_g_.m.p.ptr())
-		// We can see gp != nil here even if the M is spinning,
-		// if checkTimers added a local goroutine via goready.
-	}
-	if gp == nil {
-		gp, inheritTime = findrunnable() // blocks until work is available
-	}
-	// ...
-  execute(gp, inheritTime)
+		if gp == nil {
+			gp, inheritTime = runqget(_g_.m.p.ptr())
+			// We can see gp != nil here even if the M is spinning,
+			// if checkTimers added a local goroutine via goready.
+		}
+		if gp == nil {
+			gp, inheritTime = findrunnable() // blocks until work is available
+		}
+		// ...
+		execute(gp, inheritTime)
 }
 ```
 

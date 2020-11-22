@@ -82,16 +82,16 @@ func schedule() {
 			lock(&sched.lock)
 			gp = globrunqget(_g_.m.p.ptr(), 1)
 			unlock(&sched.lock)
+			}
 		}
-	}
-	if gp == nil {
-		gp, inheritTime = runqget(_g_.m.p.ptr())
-	}
-	if gp == nil {
-		gp, inheritTime = findrunnable() // 这个调用会阻塞, 知道有任务可以执行为止才返回
-	}
-	// ...
-  execute(gp, inheritTime)
+		if gp == nil {
+			gp, inheritTime = runqget(_g_.m.p.ptr())
+		}
+		if gp == nil {
+			gp, inheritTime = findrunnable() // 这个调用会阻塞, 知道有任务可以执行为止才返回
+		}
+		// ...
+		execute(gp, inheritTime)
 }
 ```
 
