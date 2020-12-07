@@ -6,7 +6,7 @@
 
 [when gc starts](#when-gc-starts)
 
-[how gc works](#how-gc -works)
+[how gc works](#how-gc-works)
 
 [read more](#read-more)
 
@@ -34,8 +34,9 @@ func i() *int {
 func main() {
 	i()
 }
-If we inspect the `file.s`, we can learn that `new(int)` will call `runtime.newobject` by comipler, follow the function definition in `runtime.newobject`, we can find that a resource named `span` will be selected and the memory space required by the type will be allocated from the span, and the span wil mark the object inside it's structure in a bitmap, so that gc can track which object is allocated by inspecting the span
 ```
+
+If we inspect the `file.s`, we can learn that `new(int)` will call `runtime.newobject` by comipler, follow the function definition in `runtime.newobject`, we can find that a resource named `span` will be selected and the memory space required by the type will be allocated from the span, and the span wil mark the object inside it's structure in a bitmap, so that gc can track which object is allocated by inspecting the span
 
 ## when gc starts
 
@@ -53,7 +54,7 @@ The standard entry point is inside the function `GC` defined in `src/runtime/mgc
 
 ## how gc works
 
-
+`gcBgMarkStartWorkers` 
 
 # read more
 
