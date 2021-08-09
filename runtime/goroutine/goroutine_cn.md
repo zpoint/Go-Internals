@@ -20,6 +20,12 @@
 
 ## 概览
 
+```shell
+# based on the current master branch which is 1.15
+cd go
+git reset --hard d317ba5d4489c1ef53d3077afbff30eb72d7d3b0
+```
+
 如果你对 **MPG 在Go协程调度中代表什么并且是如何工作的** 感到疑惑, 请先参考 [更多资料](#更多资料) 中的 [scheduling-in-go-part1](https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part1.html) 到 [scheduling-in-go-part3](https://www.ardanlabs.com/blog/2018/12/scheduling-in-go-part3.html) 
 
 根据上述文章以及 Go 源码中的注释

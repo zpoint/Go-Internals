@@ -27,6 +27,12 @@
 
 ## 从源代码编译安装另一个版本的 go
 
+```shell
+# based on the current master branch which is 1.15
+cd go
+git reset --hard d317ba5d4489c1ef53d3077afbff30eb72d7d3b0
+```
+
 比如我先前已经安装过了一个版本的 go
 
 ```bash

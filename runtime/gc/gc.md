@@ -48,7 +48,7 @@ The standard entry point is inside the function `GC` defined in `src/runtime/mgc
 
 * `mallocgc` is used for allocating an object of size bytes, it will check whether the gc need to be triggered in the end of the function call
 
-* `forcegchelper` will start a goroutine, and a infinity loop waiting for a signal, which is explicitly resumed by `sysmon`, So,  `sysmon` will check whether the gc need to be triggered for a period of time
+* `forcegchelper` will start a goroutine, and an infinity loop waiting for a signal, which is explicitly resumed by `sysmon`, So,  `sysmon` will check whether the gc need to be triggered for a period of time
 
 * `GC` is the definition of `runtime.GC()`, it will runs a garbage collection and blocks the caller until the garbage collection is complete. It may also block the entire program, it's the entry point of manually garbage collection
 

@@ -9,6 +9,8 @@
 
 [why](#why)
 
+[when](#when)
+
 [read more](#read-more)
 
 ## related file
@@ -18,6 +20,12 @@
 * src/plugin/plugin_dlopen.go
 
 ## overview
+
+```shell
+# based on the current master branch which is 1.15
+cd go
+git reset --hard d317ba5d4489c1ef53d3077afbff30eb72d7d3b0
+```
 
 If you're coufused about **What MPG means in go scheduling and how it works**, please read [scheduling-in-go-part1](https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part1.html) ~ [scheduling-in-go-part3](https://www.ardanlabs.com/blog/2018/12/scheduling-in-go-part3.html) first in [read more](#read-more)
 
@@ -121,7 +129,81 @@ For application level Goroutinue(**G**) context switch at application level, all
 
 From [scheduling-in-go-part2](https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part2.html)
 
+## when
 
+For voluntarily relinquish hardware resources to other `G`
+
+```go
+// src/runtime/proc.go
+func mstart1()
+/* mstart is the entry-point for new Ms.
+   It is written in assembly, uses ABI0, is marked TOPFRAME, and calls mstart0.
+   mstart0 calls mstart1
+*/
+
+// src/runtime/proc.go
+/* Puts the current goroutine into a waiting state and calls unlockf on the
+   system stack.
+   It's called in chansend, gc, netpoll, select, sleep implementation
+*/
+func park_m(gp *g)
+
+// src/runtime/proc.go
+/* It called in runtime.Gosched()
+(and gopreempt_m)
+*/
+func goschedImpl(gp *g)
+
+// src/runtime/proc.go
+/* goyield is like Gosched, but it:
+   - emits a GoPreempt trace event instead of a GoSched trace event
+   - puts the current G on the runq of the current P instead of the globrunq
+   It called in semrelease
+*/ 
+func goyield_m(gp *g)
+
+// src/runtime/proc.go
+/* Goexit terminates the goroutine that calls it. No other goroutine is affected.
+   Goexit runs all deferred calls before terminating the goroutine. Because Goexit
+   is not a panic, any recover calls in those deferred functions will return nil.
+
+   Calling Goexit from the main goroutine terminates that goroutine
+   without func main returning. Since func main has not returned,
+   the program continues execution of other goroutines.
+   If all other goroutines exit, the program crashes.
+   It's the rumtime.Goexit() call
+*/ 
+func goexit0(gp *g)
+
+// src/runtime/proc.go
+/* The goroutine g exited its system call.
+   Arrange for it to run on a cpu again.
+   This is called only from the go syscall library, not
+   from the low-level system calls used by the runtime.
+*/ 
+func exitsyscall0(gp *g)
+```
+
+For preemtive call
+
+```go
+// src/runtime/proc.go
+func preemptone(_p_ *p)
+
+// src/runtime/signal_unix.go
+func preemptM(mp *m)
+
+// src/runtime/proc.go
+/* It called in asyncPreempt2 */
+func preemptPark(gp *g)
+```
+
+The call stack is 
+
+```go
+const sigPreempt = _SIGURG
+preemptone->preemptM->signalM(mp, sigPreempt)
+```
 
 
 

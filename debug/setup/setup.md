@@ -27,6 +27,12 @@ The following steps are executed on Mac OS, The idea is the same but commands ar
 
 ## Install other go version from source
 
+```shell
+# based on the current master branch which is 1.15
+cd go
+git reset --hard d317ba5d4489c1ef53d3077afbff30eb72d7d3b0
+```
+
 We have already installed a go
 
 ```bash
