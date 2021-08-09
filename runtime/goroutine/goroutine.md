@@ -9,7 +9,7 @@
 
 [why](#why)
 
-[when](#when)
+[when will it be triggered](#when-will-it-be-triggered)
 
 [read more](#read-more)
 
@@ -129,17 +129,17 @@ For application level Goroutinue(**G**) context switch at application level, all
 
 From [scheduling-in-go-part2](https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part2.html)
 
-## when
+## when will it be triggered
 
 For voluntarily relinquish hardware resources to other `G`
 
 ```go
 // src/runtime/proc.go
-func mstart1()
 /* mstart is the entry-point for new Ms.
    It is written in assembly, uses ABI0, is marked TOPFRAME, and calls mstart0.
    mstart0 calls mstart1
 */
+func mstart1()
 
 // src/runtime/proc.go
 /* Puts the current goroutine into a waiting state and calls unlockf on the
@@ -149,8 +149,7 @@ func mstart1()
 func park_m(gp *g)
 
 // src/runtime/proc.go
-/* It called in runtime.Gosched()
-(and gopreempt_m)
+/* It called in runtime.Gosched() and gopreempt_m
 */
 func goschedImpl(gp *g)
 
@@ -194,18 +193,24 @@ func preemptone(_p_ *p)
 func preemptM(mp *m)
 
 // src/runtime/proc.go
-/* It called in asyncPreempt2 */
+/* It called in asyncPreempt2 
+   asyncPreempt2->preemptPark->schedule
+*/
 func preemptPark(gp *g)
 ```
 
 The call stack is 
 
 ```go
-const sigPreempt = _SIGURG
+// const sigPreempt = _SIGURG
 preemptone->preemptM->signalM(mp, sigPreempt)
 ```
 
+We can learn that go implement the preemtive call by unix signal, it sends the specific signal to **M**(thread), and the registered signal handler will save the current context and calls down to schedule finally(not always, if the current goroutine is not in safe point, the signal will be ignored)
 
+The signal will be sent in GC STW phrase
+
+![preempt](./preempt.png)
 
  ## read more
 

@@ -10,6 +10,8 @@
 
 [为什么](#为什么)
 
+[触发时机](#触发时机)
+
 [更多资料](#更多资料)
 
 ## 相关位置文件
@@ -129,7 +131,84 @@ func schedule() {
 
 翻译自 [scheduling-in-go-part2](https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part2.html)
 
+## 触发时机
 
+对于非抢占式调度, 主动释放硬件资源给其他 `G` 的函数入口
+
+```go
+// src/runtime/proc.go
+/* mstart 是一个新的 M(线程) 的函数主入口
+   它是用汇编语言写的, 用的是 ABI0, 标记名称为 TOPFRAME, 之后调用 mstart0
+*/
+func mstart1()
+
+// src/runtime/proc.go
+/* 把当前的 go 协程设置到等待的状态, 并且在系统调用栈调用 unlockf
+/* 
+   这个函数在 chansend(管道发送), gc(垃圾回收), netpoll(网络), select(事件循环), sleep 等多个地方都进行了调用
+*/
+func park_m(gp *g)
+
+// src/runtime/proc.go
+/* 在 runtime.Gosched() 和 gopreempt_m 进行了调用
+*/
+func goschedImpl(gp *g)
+
+// src/runtime/proc.go
+/* goyield 和 Gosched 相似, 但是它:
+   - 发送的是抢占信号而不是调度信号
+   - 把当前的 G 放到当前的 P 的本地队列中而不是全局队列中
+   在 semrelease 中调用
+*/ 
+func goyield_m(gp *g)
+
+// src/runtime/proc.go
+/* Goexit 会在不影响其他协程的情况下终止调用它的 go 协程
+   Goexit 会在结束 go 协程之前调用所有 defer 函数, 因为 Goexit 不是一个 panic, 在这些 defer 
+   函数中的 recover 调用都会返回空
+
+	 在主协程中调用 Goexit 会终止当前 go 协程, 但是 main 函数不会返回
+	 只要 main 函数不返回, 其他的 go 协程还能继续运行
+   如果所有其他的 go 协程都退出了, 当前的进程也会 crash
+   调用入口是 rumtime.Goexit()
+*/ 
+func goexit0(gp *g)
+
+// src/runtime/proc.go
+/* go 协程退出系统调用时, 需要调用 schedule 去绑定到对应的硬件资源上执行
+   只在 go 的 syscall 库中调用, runtime 不会调用
+*/ 
+func exitsyscall0(gp *g)
+```
+
+对于抢占式调度
+
+```go
+// src/runtime/proc.go
+func preemptone(_p_ *p)
+
+// src/runtime/signal_unix.go
+func preemptM(mp *m)
+
+// src/runtime/proc.go
+/* It called in asyncPreempt2 
+   asyncPreempt2->preemptPark->schedule
+*/
+func preemptPark(gp *g)
+```
+
+调用栈如下
+
+```go
+// const sigPreempt = _SIGURG
+preemptone->preemptM->signalM(mp, sigPreempt)
+```
+
+我们可以发现 go 通过 unix 信号实现抢占式调度, 它把指定信号发送给 **M**(线程), 已经注册好的信号处理函数会把当前的上下文保存, 并一路调用到 schedule 中(并不是每次都这么执行, 如果当前的协程不符合切换条件, 这个信号就会被忽略)
+
+在垃圾回收的 STW 阶段会对这个信号进行发送
+
+![preempt](./preempt.png)
 
  ## 更多资料
 
