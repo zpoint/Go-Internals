@@ -5,9 +5,9 @@
 这个仓库是本人分析 [go](https://github.com/golang/go) 源码的时候做的记录/博客
 
 ```shell script
-# based on the current master branch which is 1.15
+# based on the current master branch which is 1.17
 cd go
-git reset --hard d317ba5d4489c1ef53d3077afbff30eb72d7d3b0
+git reset --hard 891547e2d4bc2a23973e2c9f972ce69b2b48478e
 ```
 
 本人是 [go](https://github.com/golang/go) 新手, 本人在写下列内容时会尽力保持和 [CPython-Internals](https://github.com/zpoint/CPython-Internals) 还有 [Redis-Internals](https://github.com/zpoint/Redis-Internals) 一致的风格
