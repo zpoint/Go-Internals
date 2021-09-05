@@ -68,3 +68,6 @@ The standard entry point is inside the function `GC` defined in `src/runtime/mgc
 
 [go-how-does-the-garbage-collector-mark-the-memory](https://medium.com/a-journey-with-go/go-how-does-the-garbage-collector-mark-the-memory-72cfc12c6976)
 
+[Golang源码探索(三) GC的实现原理](https://www.cnblogs.com/zkweb/p/7880099.html)
+
+[Golang 垃圾回收剖析](Golang 垃圾回收剖析)
