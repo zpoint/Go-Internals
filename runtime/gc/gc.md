@@ -70,4 +70,4 @@ The standard entry point is inside the function `GC` defined in `src/runtime/mgc
 
 [Golang源码探索(三) GC的实现原理](https://www.cnblogs.com/zkweb/p/7880099.html)
 
-[Golang 垃圾回收剖析](Golang 垃圾回收剖析)
+[Golang 垃圾回收剖析](http://legendtkl.com/2017/04/28/golang-gc/)
