@@ -54,7 +54,11 @@ The standard entry point is inside the function `GC` defined in `src/runtime/mgc
 
 ## how gc works
 
-`gcBgMarkStartWorkers`  will call `gcDrain`, which calls down to `markroot` and `scanobject`, 
+`gcBgMarkStartWorkers`  will call `gcDrain`, which calls down to `markroot` and `scanobject`
+
+![gc](./gc.png)
+
+![scanblock](./scanblock.png)
 
 # read more
 
