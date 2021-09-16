@@ -60,6 +60,8 @@ The standard entry point is inside the function `GC` defined in `src/runtime/mgc
 
 ![scanblock](./scanblock.png)
 
+![markroot](./markroot.png)
+
 # read more
 
 [garbage-collection-in-go-part1](https://www.ardanlabs.com/blog/2018/12/garbage-collection-in-go-part1-semantics.html)
