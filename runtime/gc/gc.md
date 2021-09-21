@@ -58,9 +58,21 @@ The standard entry point is inside the function `GC` defined in `src/runtime/mgc
 
 ![gc](./gc.png)
 
-![scanblock](./scanblock.png)
+Let's see `markroot` first
+
+There're multi goroutine running `markroot` simultaneously, The integer in `job` is a global variable, each integer represent a range of memory area in each `module` object
+
+Each goroutine adds the variable atomically in a loop, successful in adding number means gets the job the integer represent, it will call `markroot` to mark every `module` the job represent
 
 ![markroot](./markroot.png)
+
+`markroot` calls down to `scanblock`, The following diagram shows how `scanblock` works
+
+each `bit` in `ptrmask` represent whether the correspond pointer(`p`) in the `data` part is a valid pointer
+
+If it's a valid pointer, and it represent  an object allocated in `heap`, `greyobject` will be called, otherwise, nothing will be done
+
+![scanblock](./scanblock.png)
 
 # read more
 
