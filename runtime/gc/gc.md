@@ -8,6 +8,10 @@
 
 [how gc works](#how-gc-works)
 
+* [markroot](#markroot)
+* [scanblock](#scanblock)
+* [scanobject](#scanobject)
+
 [read more](#read-more)
 
 # related file
@@ -54,6 +58,8 @@ The standard entry point is inside the function `GC` defined in `src/runtime/mgc
 
 ## how gc works
 
+## markroot
+
 `gcBgMarkStartWorkers`  will call `gcDrain`, which calls down to `markroot` and `scanobject`
 
 ![gc](./gc.png)
@@ -66,6 +72,8 @@ Each goroutine adds the variable atomically in a loop, successful in adding numb
 
 ![markroot](./markroot.png)
 
+## scanblock
+
 `markroot` calls down to `scanblock`, The following diagram shows how `scanblock` works
 
 each `bit` in `ptrmask` represent whether the correspond pointer(`p`) in the `data` part is a valid pointer
@@ -73,6 +81,12 @@ each `bit` in `ptrmask` represent whether the correspond pointer(`p`) in the `da
 If it's a valid pointer, and it represent  an object allocated in `heap`, `greyobject` will be called, otherwise, nothing will be done
 
 ![scanblock](./scanblock.png)
+
+`greyobject` will put the current pointer to the queue of the current gc work
+
+## scanobjct
+
+
 
 # read more
 
