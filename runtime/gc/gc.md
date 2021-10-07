@@ -60,7 +60,9 @@ The standard entry point is inside the function `GC` defined in `src/runtime/mgc
 
 ## markroot
 
-`gcBgMarkStartWorkers`  will call `gcDrain`, which calls down to `markroot` and `scanobject`
+`gcBgMarkStartWorkers` will start N goroutines, so there will be N goroutines running `gcBgMarkWorker` concurrently
+
+`gcBgMarkWorker`  will call `gcDrain`, which calls down to `markroot` and `scanobject`
 
 ![gc](./gc.png)
 
@@ -85,6 +87,23 @@ If it's a valid pointer, and it represent  an object allocated in `heap`, `greyo
 `greyobject` will put the current pointer to the queue of the current gc work
 
 ## scanobjct
+
+`gcDrain` will call `scanobject` in a loop after `markroot` 
+
+```go
+// Drain heap marking jobs.
+// Stop if we're preemptible or if someone wants to STW.
+for !(gp.preempt && (preemptible || atomic.Load(&sched.gcwaiting) != 0)) {
+  b := gcw.tryGetFast()
+  // check b(sjip)
+  scanobject(b, gcw)
+  // ...
+}
+```
+
+`gcw.tryGetFast` returns a pointer `greyobject` puts into the queue in above procedure
+
+After we get a pointer, we pass it to `scanobject`
 
 
 
