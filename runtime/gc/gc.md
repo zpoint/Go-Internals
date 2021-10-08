@@ -88,24 +88,32 @@ If it's a valid pointer, and it represent  an object allocated in `heap`, `greyo
 
 ## scanobjct
 
-`gcDrain` will call `scanobject` in a loop after `markroot` 
+`gcDrain` will call `scanobject` in a loop after `markroot` procedure
 
 ```go
 // Drain heap marking jobs.
 // Stop if we're preemptible or if someone wants to STW.
 for !(gp.preempt && (preemptible || atomic.Load(&sched.gcwaiting) != 0)) {
   b := gcw.tryGetFast()
-  // check b(sjip)
+  // check b(skip)
   scanobject(b, gcw)
   // ...
 }
 ```
 
-`gcw.tryGetFast` returns a pointer `greyobject` puts into the queue in above procedure
+Inside the for loop, `gcw.tryGetFast` returns a pointer(which `greyobject` puts into the queue in above procedure)
 
-After we get a pointer, we pass it to `scanobject`
+After we get the pointer, we pass it to `scanobject`
 
+![scanobject](./scanobject.png)
 
+`todo: defer span from b`
+
+`b` points to a block in a `span`, `span` stores some meta data such as head addr, tail addr, the size of each block
+
+After we get the meta data, we can
+
+![scanobject2](./scanobject2.png)
 
 # read more
 
