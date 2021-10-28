@@ -109,9 +109,9 @@ After we get the pointer, we pass it to `scanobject`
 
 `todo: defer span from b`
 
-`b` points to a block in a `span`, `span` stores some meta data such as head addr, tail addr, the size of each block
+`b` points to a block in a `span`, `span` stores some meta data such as head address, tail address, the size of each block
 
-After we get the meta data, we can
+After we get the block, we can traverse each pointer in the block, see if it points to somewhere else in the heap, if so, call `greyobject` to put it in the queue
 
 ![scanobject2](./scanobject2.png)
 
