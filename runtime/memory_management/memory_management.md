@@ -76,6 +76,27 @@ each bit in `allocBits` represents a block in the current span, i.e, the first b
 
 `freeindex` points to the next free block, `allocCache` is of type `uint64`,  at first, it cache the first 64 bits in `allocBits`, it's value is  `^allocBits[0]~allocBits[7]`, so that we can get the next free index by counting the trailing zeros in `allocCache`, after we used the final block in `allocCache`, `allocCache` will cache the next 64 bits in `allocBits`, it's value becomes `^allocBits[8]~allocBits[15]`, and so on
 
+```go
+// nextFreeIndex returns the index of the next free object in s at or after s.freeindex.
+// src/runtime/mbitmap.go
+func (s *mspan) nextFreeIndex() uintptr {
+	sfreeindex := s.freeindex
+	snelems := s.nelems
+  // ...
+	aCache := s.allocCache
+  // Ctz64 counts trailing zero of aCache, which is the index of next free block
+	bitIndex := sys.Ctz64(aCache)
+	// ...
+	result := sfreeindex + uintptr(bitIndex)
+  // ...
+	s.allocCache >>= uint(bitIndex + 1)
+	sfreeindex = result + 1
+  // ...
+	s.freeindex = sfreeindex
+	return result
+}
+```
+
 
 
 # read more
