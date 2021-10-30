@@ -4,6 +4,12 @@
 
 [related file](#related-file)
 
+[mallocgc](#mallocgc)
+
+* [<=16b](#<=16b)
+* [<=32kb](#<=32kb)
+* [>32kb](#>32kb)
+
 [read more](#read-more)
 
 # related file
@@ -15,9 +21,7 @@
 
 
 
-## span
-
-
+# mallocgc
 
 
 
@@ -40,9 +44,61 @@ func main() {
 
 We compile the above code with `go tool compile -S main.go` , we can find that the address of `type.int` is loaded into `AX`, and `runtime.newobject` will be called with the just loaded parameter(address of `type.int`)
 
+## <=16b
+
 For object size < 16 bytes
 
-For object size < 32kb
+```go
+package main
+
+type smallStruct struct {
+	// 3 bytes
+	a int16
+	b int8
+}
+
+//go:noinline
+func f() *smallStruct {
+	return &smallStruct{}
+}
+
+func main() {
+	f()
+  f()
+  f()
+  f()
+}
+```
+
+The size will be rounded up to (2, 4, 8) bytes for alignment, and will be allocated from current `M`'s tiny cache
+
+ After the first `f()`
+
+`tiny` points to a 16 bytes block allocated from a specifc span in `alloc`
+
+ The 3 bytes `smallStruct` is rounded up to 4 byte for alignment, and the first 4 bytes in `tiny` is use for the current `smallStruct`
+
+![mcache_1](./mcache_1.png)
+
+After the second `f()`, the `5 - 7` bytes is allocated for the new  `smallStruct`, the actual space itallocated still round up to 4 bytes
+
+`tinyAllocs` bbecomes 1, it means how many objects allocated in the current `tiny` except the first object
+
+![mcache_2](./mcache_2.png)
+
+After the third `f()`, `tinyoffset` becomes `12` and `tinyAllocs` becomes 2
+
+![mcache_3](./mcache_3.png)
+
+After the final `f()`, now we've used all the space in the current `tiny`, next time you trigger the condition `<=16b`,  a new memory block of size 16 bytes will be allocated from the specific span `mcache.alloc[tinySpanClass]`, and `tiny` will points to the address of newly allocated memory, the whole procedure will repeat again
+
+![mcache_4](./mcache_4.png)
+
+
+
+## <=32kb
+
+For object size < =32kb
 
 ```go
 package main
@@ -76,26 +132,35 @@ each bit in `allocBits` represents a block in the current span, i.e, the first b
 
 `freeindex` points to the next free block, `allocCache` is of type `uint64`,  at first, it cache the first 64 bits in `allocBits`, it's value is  `^allocBits[0]~allocBits[7]`, so that we can get the next free index by counting the trailing zeros in `allocCache`, after we used the final block in `allocCache`, `allocCache` will cache the next 64 bits in `allocBits`, it's value becomes `^allocBits[8]~allocBits[15]`, and so on
 
+## >32kb
+
+For object size >=32kb, the page size needed will be calculated(`npages := size >> _PageShift`), and a new span with page number `npages` will be allocated from `heap`
+
 ```go
-// nextFreeIndex returns the index of the next free object in s at or after s.freeindex.
-// src/runtime/mbitmap.go
-func (s *mspan) nextFreeIndex() uintptr {
-	sfreeindex := s.freeindex
-	snelems := s.nelems
-  // ...
-	aCache := s.allocCache
-  // Ctz64 counts trailing zero of aCache, which is the index of next free block
-	bitIndex := sys.Ctz64(aCache)
-	// ...
-	result := sfreeindex + uintptr(bitIndex)
-  // ...
-	s.allocCache >>= uint(bitIndex + 1)
-	sfreeindex = result + 1
-  // ...
-	s.freeindex = sfreeindex
-	return result
+package main
+
+type smallStruct struct {
+	// 16kb + 16kb + 1b
+	a [2048]int64
+	b [2048]uintptr
+	c int8
+}
+
+//go:noinline
+func f() *smallStruct {
+	return &smallStruct{}
+}
+
+func main() {
+	f()
 }
 ```
+
+After `f()`, a new span with `spanClass->1` will be allocated from heap, and the whole span only contains one element, with element size `5 * 8096 == 40960 bytes` (5 pages)
+
+The actual size needed is `32769 bytes`, but the unit span allocated is pages, so the size is rounded up to next bigger page number
+
+![span_large](./span_large.png)
 
 
 
