@@ -4,6 +4,10 @@
 
 [related file](#related-file)
 
+[heap](#heap)
+
+[span](#span)
+
 [mallocgc](#mallocgc)
 
 * [<=16b](#<=16b)
@@ -19,11 +23,17 @@
 * src/runtime/mgcmark.go
 * src/runtime/mbitmap.go
 
+# heap
 
+
+
+# span
+
+Every `P` stores a pointer `mcache`, which caches a list of different size of span
+
+ 
 
 # mallocgc
-
-
 
 > The annotation `//go:noinline` will disable in-lining that would optimize the code by removing the function and, therefore, end up with no allocation.
 
