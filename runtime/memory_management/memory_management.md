@@ -25,6 +25,10 @@
 
 # heap
 
+This is the basic structure of go runtime heap
+
+![heap](./heap.png)
+
 ```go
 // src/runtime/mheap.go
 
@@ -39,9 +43,23 @@ func (h *mheap) init() {
 func (h *mheap) grow(npage uintptr) bool {
 }
 
+// allocSpan allocates an mspan which owns npages worth of memory.
 func (h *mheap) allocSpan(npages uintptr, typ spanAllocType, spanclass spanClass) (s *mspan) {
 }
 ```
+
+
+
+The `heapArena` of a specific address can be computed by the following two lines
+
+```go
+ai := arenaIndex(base)
+ha := h.arenas[ai.l1()][ai.l2()]
+```
+
+> // A heapArena stores metadata for a heap arena. heapArenas are stored outside of the Go heap and accessed via the mheap_.arenas index.
+
+
 
 # span
 
@@ -256,6 +274,8 @@ each bit in `allocBits` represents a block in the current span, i.e, the first b
 ![allocbits](./allocbits.png)
 
 `freeindex` points to the next free block, `allocCache` is of type `uint64`,  at first, it cache the first 64 bits in `allocBits`, it's value is  `^allocBits[0]~allocBits[7]`, so that we can get the next free index by counting the trailing zeros in `allocCache`, after we used the final block in `allocCache`, `allocCache` will cache the next 64 bits in `allocBits`, it's value becomes `^allocBits[8]~allocBits[15]`, and so on
+
+During gc sweep phase,`gcmarkBits` will store the latest mark for all elements in the current span, and after gc, `allocBits` 's value will be replaced by `gcmarkBits`'s value
 
 ## >32kb
 
