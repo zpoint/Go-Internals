@@ -29,6 +29,12 @@ This is the basic structure of go runtime heap
 
 ![heap](./heap.png)
 
+`heapArenaBitmapBytes` is 2097152 on my platform, and `pagesPerArena` is 8192, it means each arena in arenas stores 8mb of metadata(2097152 / 2 * 8)
+
+
+
+
+
 ```go
 // src/runtime/mheap.go
 
