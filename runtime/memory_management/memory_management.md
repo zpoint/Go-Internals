@@ -29,7 +29,40 @@ This is the basic structure of go runtime heap
 
 ![heap](./heap.png)
 
-`heapArenaBitmapBytes` is 2097152 on my platform, and `pagesPerArena` is 8192, it means each arena in arenas stores 8mb of metadata(2097152 / 2 * 8)
+`heapArenaBitmapBytes` is 2097152 on my platform, and `pagesPerArena` is 8192, it means the metadata each arena in arenas represents 8mb(2097152 / 2 * 8) space
+
+This is how metadata in `bitmap` field represents the actual data, the lower 4 bits represents whether the pointer size object it points to is a pointer, and the higher 4 bits represents whether the object it points to may contains other pointer(need to be scaned)
+
+> ```go
+> // In each 2-bit entry, the lower bit is a pointer/scalar bit, just
+> // like in the stack/data bitmaps described above. The upper bit
+> // indicates scan/dead: a "1" value ("scan") indicates that there may
+> // be pointers in later words of the allocation, and a "0" value
+> // ("dead") indicates there are no more pointers in the allocation. If
+> // the upper bit is 0, the lower bit must also be 0, and this
+> // indicates scanning can ignore the rest of the allocation.
+> //
+> // The 2-bit entries are split when written into the byte, so that the top half
+> // of the byte contains 4 high (scan) bits and the bottom half contains 4 low
+> // (pointer) bits. This form allows a copy from the 1-bit to the 4-bit form to
+> // keep the pointer bits contiguous, instead of having to space them out.
+> ```
+
+![heapArena](./heapArena.png)
+
+The `central` is described in the following diagram
+
+`spanSet` is a stack like structure which provide concurrency push and pop interface, the implementation looks like `c++ vector` 
+
+> ```go
+> // partial and full contain two mspan sets: one of swept in-use
+> // spans, and one of unswept in-use spans. These two trade
+> // roles on each GC cycle. The unswept set is drained either by
+> // allocation or by the background sweeper in every GC cycle,
+> // so only two roles are necessary.
+> ```
+
+![mcentral](./mcentral.png)
 
 
 
