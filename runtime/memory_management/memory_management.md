@@ -4,8 +4,6 @@
 
 [related file](#related-file)
 
-[heap](#heap)
-
 [span](#span)
 
 [mallocgc](#mallocgc)
@@ -13,6 +11,8 @@
 * [<=16b](#<=16b)
 * [<=32kb](#<=32kb)
 * [>32kb](#>32kb)
+
+[heap](#heap)
 
 [read more](#read-more)
 
@@ -22,83 +22,6 @@
 * src/runtime/malloc.go
 * src/runtime/mgcmark.go
 * src/runtime/mbitmap.go
-
-# heap
-
-This is the basic structure of go runtime heap
-
-![heap](./heap.png)
-
-`heapArenaBitmapBytes` is 2097152 on my platform, and `pagesPerArena` is 8192, it means the metadata each arena in arenas represents 8mb(2097152 / 2 * 8) space
-
-This is how metadata in `bitmap` field represents the actual data, the lower 4 bits represents whether the pointer size object it points to is a pointer, and the higher 4 bits represents whether the object it points to may contains other pointer(need to be scaned)
-
-> ```go
-> // In each 2-bit entry, the lower bit is a pointer/scalar bit, just
-> // like in the stack/data bitmaps described above. The upper bit
-> // indicates scan/dead: a "1" value ("scan") indicates that there may
-> // be pointers in later words of the allocation, and a "0" value
-> // ("dead") indicates there are no more pointers in the allocation. If
-> // the upper bit is 0, the lower bit must also be 0, and this
-> // indicates scanning can ignore the rest of the allocation.
-> //
-> // The 2-bit entries are split when written into the byte, so that the top half
-> // of the byte contains 4 high (scan) bits and the bottom half contains 4 low
-> // (pointer) bits. This form allows a copy from the 1-bit to the 4-bit form to
-> // keep the pointer bits contiguous, instead of having to space them out.
-> ```
-
-![heapArena](./heapArena.png)
-
-The `central` is described in the following diagram
-
-`spanSet` is a stack like structure which provide concurrency push and pop interface, the implementation looks like `c++ vector` 
-
-> ```go
-> // partial and full contain two mspan sets: one of swept in-use
-> // spans, and one of unswept in-use spans. These two trade
-> // roles on each GC cycle. The unswept set is drained either by
-> // allocation or by the background sweeper in every GC cycle,
-> // so only two roles are necessary.
-> ```
-
-![mcentral](./mcentral.png)
-
-
-
-
-
-```go
-// src/runtime/mheap.go
-
-// Initialize the heap.
-func (h *mheap) init() {
-}
-
-// Try to add at least npage pages of memory to the heap,
-// returning whether it worked.
-//
-// h.lock must be held.
-func (h *mheap) grow(npage uintptr) bool {
-}
-
-// allocSpan allocates an mspan which owns npages worth of memory.
-func (h *mheap) allocSpan(npages uintptr, typ spanAllocType, spanclass spanClass) (s *mspan) {
-}
-```
-
-
-
-The `heapArena` of a specific address can be computed by the following two lines
-
-```go
-ai := arenaIndex(base)
-ha := h.arenas[ai.l1()][ai.l2()]
-```
-
-> // A heapArena stores metadata for a heap arena. heapArenas are stored outside of the Go heap and accessed via the mheap_.arenas index.
-
-
 
 # span
 
@@ -304,7 +227,7 @@ This is the span before running `f()`
 
 ![span_before](./span_before.png)
 
-This is the span after running `f()`, the block`freeindex` pointed to is used for current allocation, and `freeindex` is moved forward
+This is the span after running `f()`, the block `freeindex` pointed to is used for current allocation, and `freeindex` is moved forward
 
 ![span_after](./span_after.png)
 
@@ -314,7 +237,7 @@ each bit in `allocBits` represents a block in the current span, i.e, the first b
 
 `freeindex` points to the next free block, `allocCache` is of type `uint64`,  at first, it cache the first 64 bits in `allocBits`, it's value is  `^allocBits[0]~allocBits[7]`, so that we can get the next free index by counting the trailing zeros in `allocCache`, after we used the final block in `allocCache`, `allocCache` will cache the next 64 bits in `allocBits`, it's value becomes `^allocBits[8]~allocBits[15]`, and so on
 
-During gc sweep phase,`gcmarkBits` will store the latest mark for all elements in the current span, and after gc, `allocBits` 's value will be replaced by `gcmarkBits`'s value
+During gc sweep phase,`gcmarkBits` will store the latest mark for all elements in the current span, and after gc, `allocBits` 's value will be replaced by `gcmarkBits`'s value,  `allocCache` and `freeindex` will also be reset
 
 ## >32kb
 
@@ -345,6 +268,94 @@ After `f()`, a new span with `spanClass->1` will be allocated from heap, and the
 The actual size needed is `32769 bytes`, but the unit span allocated is pages, so the size is rounded up to next bigger page number
 
 ![span_large](./span_large.png)
+
+
+
+# heap
+
+This is the basic structure of go runtime heap
+
+![heap](./heap.png)
+
+The `heapArena` of a specific address can be computed by the following two lines
+
+```go
+ai := arenaIndex(base)
+ha := h.arenas[ai.l1()][ai.l2()]
+```
+
+> // A heapArena stores metadata for a heap arena. heapArenas are stored outside of the Go heap and accessed via the mheap_.arenas index.
+
+`heapArenaBitmapBytes` is 2097152 on my platform, and `pagesPerArena` is 8192, it means the metadata each arena in arenas represents 8mb(2097152 / 2 * 8) space
+
+This is how metadata in `bitmap` field represents the actual data, the lower 4 bits represents whether the pointer size object it points to is a pointer, and the higher 4 bits represents whether the object it points to may contains other pointer(need to be scaned)
+
+> ```go
+> // In each 2-bit entry, the lower bit is a pointer/scalar bit, just
+> // like in the stack/data bitmaps described above. The upper bit
+> // indicates scan/dead: a "1" value ("scan") indicates that there may
+> // be pointers in later words of the allocation, and a "0" value
+> // ("dead") indicates there are no more pointers in the allocation. If
+> // the upper bit is 0, the lower bit must also be 0, and this
+> // indicates scanning can ignore the rest of the allocation.
+> //
+> // The 2-bit entries are split when written into the byte, so that the top half
+> // of the byte contains 4 high (scan) bits and the bottom half contains 4 low
+> // (pointer) bits. This form allows a copy from the 1-bit to the 4-bit form to
+> // keep the pointer bits contiguous, instead of having to space them out.
+> ```
+
+![heapArena](./heapArena.png)
+
+The `central` is described in the following diagram
+
+> ```go
+> // central free lists for small size classes.
+> // central is indexed by spanClass.
+> ```
+
+`spanSet` is a stack like structure which provide concurrency push and pop interface, the implementation looks like `c++ vector` 
+
+> ```go
+> // partial and full contain two mspan sets: one of swept in-use
+> // spans, and one of unswept in-use spans. These two trade
+> // roles on each GC cycle. The unswept set is drained either by
+> // allocation or by the background sweeper in every GC cycle,
+> // so only two roles are necessary.
+> ```
+
+![mcentral](./mcentral.png)
+
+
+
+We can learn more detail from the following source code
+
+```go
+// src/runtime/mheap.go
+
+// Initialize the heap.
+func (h *mheap) init() {
+}
+
+// Try to add at least npage pages of memory to the heap,
+// returning whether it worked.
+//
+// h.lock must be held.
+func (h *mheap) grow(npage uintptr) bool {
+}
+
+// allocSpan allocates an mspan which owns npages worth of memory.
+func (h *mheap) allocSpan(npages uintptr, typ spanAllocType, spanclass spanClass) (s *mspan) {
+}
+```
+
+
+
+Let's chain together
+
+
+
+
 
 
 
