@@ -11,6 +11,7 @@
 * [<=16b](#<=16b)
 * [<=32kb](#<=32kb)
 * [>32kb](#>32kb)
+* [contains pointer](#contains-pointer)
 
 [heap](#heap)
 
@@ -126,7 +127,9 @@ The `span` is not allocated when the program started, it's allocated on the fly(
 
 ```
 
+This is layout of `mspan`
 
+![span_layout](./span_layout.png)
 
 # mallocgc
 
@@ -268,6 +271,47 @@ After `f()`, a new span with `spanClass->1` will be allocated from heap, and the
 The actual size needed is `32769 bytes`, but the unit span allocated is pages, so the size is rounded up to next bigger page number
 
 ![span_large](./span_large.png)
+
+
+
+At the end mallocing, if  our go runtime is in the middle of gc phase, the current object will be marked as black(the corresponding bit in `gcmarkBits` will be set)
+
+# contains pointer
+
+The above allocated object does not contains pointer, the noscan flag is always true, and the noscan span will always be used
+
+What if the allocated object contains pointer ?
+
+```go
+package main
+
+type myObject struct {
+	a int64
+	b [16] int64
+}
+
+type smallStruct struct {
+	a [8]int64
+	b [8]*myObject
+	c [8]uint64
+}
+
+//go:noinline
+func f() *smallStruct {
+	return &smallStruct{}
+}
+
+func main() {
+	f()
+}
+
+```
+
+This is type object of `smallStruct` go generated in compile time
+
+
+
+
 
 
 
