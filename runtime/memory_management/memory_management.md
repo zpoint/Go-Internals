@@ -292,7 +292,7 @@ type myObject struct {
 
 type smallStruct struct {
 	a [8]int64
-	b [8]*myObject
+	b [32]*myObject
 	c [8]uint64
 }
 
@@ -307,9 +307,9 @@ func main() {
 
 ```
 
-This is type object of `smallStruct` go generated in compile time
+This is type object of `smallStruct` go generated in runtime
 
-
+![type_smallStruct](./type_smallStruct.png)
 
 
 
