@@ -309,7 +309,19 @@ func main() {
 
 This is type object of `smallStruct` go generated in runtime
 
+`size` is the total size in bytes of the `smallStruct`
+
+`ptrdata` means the first `ptrdata`  bytes may contains pointer somewhere, from `ptrdata` to the end does not contain any pointer 
+
+`gcdata` points to an array of byte, each byte represent whether each bit it represent is pointer
+
 ![type_smallStruct](./type_smallStruct.png)
+
+Their relation
+
+
+
+
 
 
 
