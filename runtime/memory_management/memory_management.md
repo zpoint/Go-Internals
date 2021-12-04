@@ -4,6 +4,8 @@
 
 [related file](#related-file)
 
+[overview](#overview)
+
 [span](#span)
 
 [mallocgc](#mallocgc)
@@ -317,7 +319,19 @@ This is type object of `smallStruct` go generated in runtime
 
 ![type_smallStruct](./type_smallStruct.png)
 
-Their relation
+Their relation can be described as
+
+![type_smallStruct_relation](./type_smallStruct_relation.png)
+
+Because the total size is 384, <= 32kb, the `sizeclass` 22, the `noscan` flag is `false`, so the latter one will be chosen
+
+After it gets a block from `span`, `heapBitsSetType` will be called
+
+This is what `heapBitsSetType` do
+
+It finds the corresponding `arena`, and sets the `bitmap` in the corresponding `heapArena`
+
+![type_smallStruct_arena](type_smallStruct_arena.png)
 
 
 
