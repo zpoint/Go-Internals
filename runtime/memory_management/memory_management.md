@@ -13,7 +13,7 @@
 * [<=16b](#<=16b)
 * [<=32kb](#<=32kb)
 * [>32kb](#>32kb)
-* [contains pointer](#contains-pointer)
+* [contain pointer](#contain-pointer)
 
 [heap](#heap)
 
@@ -25,6 +25,12 @@
 * src/runtime/malloc.go
 * src/runtime/mgcmark.go
 * src/runtime/mbitmap.go
+
+# overview
+
+![overview](./overview.png)
+
+When you allocate memory space in go, the space is 
 
 # span
 
@@ -278,7 +284,7 @@ The actual size needed is `32769 bytes`, but the unit span allocated is pages, s
 
 At the end mallocing, if  our go runtime is in the middle of gc phase, the current object will be marked as black(the corresponding bit in `gcmarkBits` will be set)
 
-# contains pointer
+# contain pointer
 
 The above allocated object does not contains pointer, the noscan flag is always true, and the noscan span will always be used
 
@@ -329,17 +335,13 @@ After it gets a block from `span`, `heapBitsSetType` will be called
 
 This is what `heapBitsSetType` do
 
-It finds the corresponding `arena`, and sets the `bitmap` in the corresponding `heapArena`
+It finds the corresponding `arena`, and sets the `bitmap` in the corresponding `heapArena` according to the metadata stored in `gcdata`
 
 ![type_smallStruct_arena](type_smallStruct_arena.png)
 
 
 
-
-
-
-
-
+So that the gc scan can traverse each byte in the object, query the `bitmap` in the `heapArena` to see if it's a pointer points to somewhere else
 
 # heap
 
@@ -418,16 +420,6 @@ func (h *mheap) grow(npage uintptr) bool {
 func (h *mheap) allocSpan(npages uintptr, typ spanAllocType, spanclass spanClass) (s *mspan) {
 }
 ```
-
-
-
-Let's chain together
-
-
-
-
-
-
 
 # read more
 
