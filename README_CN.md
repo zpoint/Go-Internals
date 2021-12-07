@@ -34,5 +34,5 @@ git reset --hard 891547e2d4bc2a23973e2c9f972ce69b2b48478e
 - [x] goroutine
 	- [x] [概览与调度](https://github.com/zpoint/Go-Internals/blob/1.15/runtime/goroutine/goroutine_cn.md)
 - [ ] [垃圾回收](https://github.com/zpoint/Go-Internals/blob/1.15/runtime/gc/gc_cn.md)
-- [ ] [内存管理](https://github.com/zpoint/Go-Internals/blob/1.15/runtime/memory_management/memory_management_cn.md)
+- [x] [内存管理](https://github.com/zpoint/Go-Internals/blob/1.15/runtime/memory_management/memory_management_cn.md)
 

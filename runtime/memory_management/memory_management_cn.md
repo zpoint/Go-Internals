@@ -1,4 +1,4 @@
-# memory management
+# memory management![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals%2F/runtime/memory_management_cn)
 
 # 目录
 
