@@ -30,11 +30,25 @@
 
 ![overview](./overview.png)
 
-When you allocate memory space in go, the space is 
+When you allocate memory space in go, the memory is allocated from `span`, usually, `span` is 8kb and each element is `span` is of size `N`, a `span` contains 8kb / `N`  element, the `alloc` request a free element in the `span`
+
+`span` is cached in `mcache`, `mcache` is a per-thread (in Go, per-P) cache structure, is caches `136` different `span` in the current `P`, so that you can get a span quickly without lock
+
+If the current `span` in `macache` is full or empty, it will request a new `span` from `mcentral`,   `mcentral` stores two linked list of `span`, `mcentral` is a global structure stores in `heap`, and it will find a free `span `  from one of the linked list
+
+If the `mcentral` can not find a usable `span`,  it will get one from `P` 's cache, which is allocated from `heap`
+
+`arena` is a structure stores metadata of `heap` memoery, each `arena` represents 64MB of memory, and with a `bitmap` indicate whether each byte in the corresponding memory needs to be scaned, whether this byte is a pointer
+
+Go maps a all virtual address range in heap to the whole `arena`  array, when you get an address of an object, you can simply get the `arena` index by simply `(addr - base_addr) / range_length` , and gets the `arena` object from the `arena` array
+
+It does the map by `mmap` [system call](https://man7.org/linux/man-pages/man2/mmap.2.html), and the call will not actually [occupy physical memory space](https://stackoverflow.com/questions/12383900/does-mmap-really-copy-data-to-the-memory)
+
+address in different `arena` is not continguious since go 1.11
 
 # span
 
-Every `P` stores a pointer `mcache`, which caches a list of different size of span
+Every `P` stores a pointer `mcache`, which caches a list of different element size of span
 
  ```go
  // src/runtime/mcache.go
@@ -56,7 +70,7 @@ Every `P` stores a pointer `mcache`, which caches a list of different size of sp
 
 `numSpanClasses` is 136 by default, The `alloc` array in `mcache` stores 136 different `span`, `alloc[2]` and `alloc[3]` are of the same size, one for `noscan`(object without pointer) and one for `scan`,  `alloc[4]` and `alloc[5]` are also of the same size, and so on, element size vary from 8 bytes to 32kb
 
-The odd one is used for `noscan` and even one is used for scan
+The odd one is used for `noscan` and even one is used for `scan`
 
 The `span` is not allocated when the program started, it's allocated on the fly(when you request the specific size of `span`) 
 
@@ -192,13 +206,13 @@ The size will be rounded up to (2, 4, 8) bytes for alignment, and will be alloca
 
 `tiny` points to a 16 bytes block allocated from a specifc span in `alloc`
 
- The 3 bytes `smallStruct` is rounded up to 4 byte for alignment, and the first 4 bytes in `tiny` is use for the current `smallStruct`
+ The 3 bytes `smallStruct` is rounded up to 4 byte for alignment, so the first 4 bytes in `tiny` is use for the current `smallStruct`
 
 ![mcache_1](./mcache_1.png)
 
-After the second `f()`, the `5 - 7` bytes is allocated for the new  `smallStruct`, the actual space itallocated still round up to 4 bytes
+After the second `f()`, the `5 - 7` bytes is allocated for the new  `smallStruct`, the actual space it allocated still round up to 4 bytes
 
-`tinyAllocs` bbecomes 1, it means how many objects allocated in the current `tiny` except the first object
+`tinyAllocs` becomes 1, it means how many objects allocated in the current `tiny` except the first object
 
 ![mcache_2](./mcache_2.png)
 
@@ -248,11 +262,11 @@ each bit in `allocBits` represents a block in the current span, i.e, the first b
 
 `freeindex` points to the next free block, `allocCache` is of type `uint64`,  at first, it cache the first 64 bits in `allocBits`, it's value is  `^allocBits[0]~allocBits[7]`, so that we can get the next free index by counting the trailing zeros in `allocCache`, after we used the final block in `allocCache`, `allocCache` will cache the next 64 bits in `allocBits`, it's value becomes `^allocBits[8]~allocBits[15]`, and so on
 
-During gc sweep phase,`gcmarkBits` will store the latest mark for all elements in the current span, and after gc, `allocBits` 's value will be replaced by `gcmarkBits`'s value,  `allocCache` and `freeindex` will also be reset
+During gc sweep phase, `gcmarkBits` will store the latest mark for all elements in the current span, and after gc, `allocBits` 's value will be replaced by `gcmarkBits`'s value,  `allocCache` and `freeindex` will also be reset
 
 ## >32kb
 
-For object size >=32kb, the page size needed will be calculated(`npages := size >> _PageShift`), and a new span with page number `npages` will be allocated from `heap`
+For object size > 32kb, the page size needed will be calculated(`npages := size >> _PageShift`), and a new span with page number `npages` will be allocated from `heap`
 
 ```go
 package main
@@ -282,7 +296,7 @@ The actual size needed is `32769 bytes`, but the unit span allocated is pages, s
 
 
 
-At the end mallocing, if  our go runtime is in the middle of gc phase, the current object will be marked as black(the corresponding bit in `gcmarkBits` will be set)
+At the end of mallocing, if  our go runtime is in the middle of gc phase, the current object will be marked as black(the corresponding bit in `gcmarkBits` will be set)
 
 # contain pointer
 
@@ -321,7 +335,7 @@ This is type object of `smallStruct` go generated in runtime
 
 `ptrdata` means the first `ptrdata`  bytes may contains pointer somewhere, from `ptrdata` to the end does not contain any pointer 
 
-`gcdata` points to an array of byte, each byte represent whether each bit it represent is pointer
+`gcdata` points to an array of byte, each bit represent whether each 8-byte it represent is pointer
 
 ![type_smallStruct](./type_smallStruct.png)
 
@@ -341,7 +355,7 @@ It finds the corresponding `arena`, and sets the `bitmap` in the corresponding `
 
 
 
-So that the gc scan can traverse each byte in the object, query the `bitmap` in the `heapArena` to see if it's a pointer points to somewhere else
+So that the gc scan can traverse the object in 8-byte step, query the `bitmap` in the `heapArena` to see if it's a pointer points to somewhere else
 
 # heap
 
@@ -358,7 +372,7 @@ ha := h.arenas[ai.l1()][ai.l2()]
 
 > // A heapArena stores metadata for a heap arena. heapArenas are stored outside of the Go heap and accessed via the mheap_.arenas index.
 
-`heapArenaBitmapBytes` is 2097152 on my platform, and `pagesPerArena` is 8192, it means the metadata each arena in arenas represents 8mb(2097152 / 2 * 8) space
+`heapArenaBitmapBytes` is 2097152 on my platform, and `pagesPerArena` is 8192, it means the metadata each arena in arenas represents 64mb((2097152 * 8) / 2 * 8) space
 
 This is how metadata in `bitmap` field represents the actual data, the lower 4 bits represents whether the pointer size object it points to is a pointer, and the higher 4 bits represents whether the object it points to may contains other pointer(need to be scaned)
 
