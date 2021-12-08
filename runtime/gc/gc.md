@@ -1,8 +1,10 @@
-# gc
+# gc![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals%2F/runtime/gc)
 
 # contents
 
 [related file](#related-file)
+
+[overview](#overview)
 
 [when gc starts](#when-gc-starts)
 
@@ -20,6 +22,14 @@
 * src/runtime/malloc.go
 * src/runtime/mgcmark.go
 * src/runtime/mbitmap.go
+
+## overview
+
+This article focus on the source code view of how some phase of gc implemented, you should have a basic knowledge of [tricolor garbage collector](https://pusher.github.io/tricolor-gc-visualization/) and [garbage-collection-in-go](https://www.ardanlabs.com/blog/2018/12/garbage-collection-in-go-part1-semantics.html) (refer to [read more](#read-more) for more high level overview article)
+
+Basic knowledge of  [go memory management implementation](https://github.com/zpoint/Go-Internals/blob/master/runtime/memory_management/memory_management.md) is also required
+
+
 
 ```bash
 go tool compile -S -N example_new.go > file.s
@@ -40,7 +50,7 @@ func main() {
 }
 ```
 
-If we inspect the `file.s`, we can learn that `new(int)` will call `runtime.newobject` by comipler, follow the function definition in `runtime.newobject`, we can find that a resource named `span` will be selected and the memory space required by the type will be allocated from the span, and the span wil mark the object inside it's structure in a bitmap, so that gc can track which object is allocated by inspecting the span
+If we inspect the `file.s`, we can learn that `new(int)` will call `runtime.newobject` by comipler, follow the function definition in `runtime.newobject`, we can find that a resource named `span` will be selected and the memory space required by the type will be allocated from the span, if the malloc object does not contain pointer, the `noscan` span will be used, otherwise, the `scan` span will be used, and the corresponding `heapArena` structure contains a `bitmap` , the `bitmap` will be marked so that gc can track which object contains pointer by querying the `bitmap`
 
 ## when gc starts
 
@@ -68,7 +78,7 @@ The standard entry point is inside the function `GC` defined in `src/runtime/mgc
 
 Let's see `markroot` first
 
-There're multi goroutine running `markroot` simultaneously, The integer in `job` is a global variable, each integer represent a range of memory area in each `module` object
+There're multiply goroutine running `markroot` simultaneously, The integer in `job` is a global variable, each integer represent a range of memory area in each `module` object
 
 Each goroutine adds the variable atomically in a loop, successful in adding number means gets the job the integer represent, it will call `markroot` to mark every `module` the job represent
 
@@ -84,7 +94,9 @@ If it's a valid pointer, and it represent  an object allocated in `heap`, `greyo
 
 ![scanblock](./scanblock.png)
 
-`greyobject` will put the current pointer to the queue of the current gc work
+If the `span`  the current `p`  belongs to is `noscan`  span,  `greyobject` mark will it as grey and return
+
+If the `span`  the current `p`  belongs to is `scan`  span, `greyobject` will put the current pointer to the queue of the current gc work
 
 ## scanobjct
 
@@ -105,13 +117,14 @@ Inside the for loop, `gcw.tryGetFast` returns a pointer(which `greyobject` puts 
 
 After we get the pointer, we pass it to `scanobject`
 
-![scanobject](./scanobject.png)
+```go
+ai := arenaIndex(b)
+ha := h.arenas[ai.l1()][ai.l2()]
+```
 
-`todo: defer span from b`
+If you need to know the detail of what `heapArena` /`span`/`bitmap`  is please refer to [go memory management implementation](https://github.com/zpoint/Go-Internals/blob/master/runtime/memory_management/memory_management.md)
 
-`b` points to a block in a `span`, `span` stores some meta data such as head address, tail address, the size of each block
-
-After we get the block, we can traverse each pointer in the block, see if it points to somewhere else in the heap, if so, call `greyobject` to put it in the queue
+`span` stores the size of the new object, `heapArena` stores the bitmap information of the new object, querying the `bitmap`  we can know whether each byte in the new object is a pointer and points to somewhere else, if so, call `greyobject` to put it in the queue again
 
 ![scanobject2](./scanobject2.png)
 

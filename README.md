@@ -29,6 +29,6 @@ git reset --hard 891547e2d4bc2a23973e2c9f972ce69b2b48478e
 
 - [x] goroutine
 	- [x] [overview and schedule](https://github.com/zpoint/Go-Internals/blob/master/runtime/goroutine/goroutine.md)
-- [ ] [gc](https://github.com/zpoint/Go-Internals/blob/master/runtime/gc/gc.md)
+- [x] [gc](https://github.com/zpoint/Go-Internals/blob/master/runtime/gc/gc.md)
 - [x] [memory management](https://github.com/zpoint/Go-Internals/blob/master/runtime/memory_management/memory_management.md)
 
