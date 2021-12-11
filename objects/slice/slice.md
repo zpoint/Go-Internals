@@ -6,7 +6,9 @@
 
 [memory layout](#memory-layout)
 
+[makeslice](#makeslice)
 
+[growslice](#growslice)
 
 ## related file
 
@@ -100,4 +102,26 @@ Now the `runtime.makeslice` is called and the slice is malloced from the runtime
         0x0036 00054 (main.go:4)        MOVQ    $30000, "".a+40(SP)
 
 ```
+
+## makeslice
+
+The `makeslice` calculate how many bytes needed according to the `type` and `cap`  of the current `slice`, and do something if overflow occured
+
+```go
+func makeslice(et *_type, len, cap int) unsafe.Pointer {
+  mem, overflow := math.MulUintptr(et.size, uintptr(cap))
+  // omit ...
+	return mallocgc(mem, et, true)
+}
+```
+
+## growslice
+
+If you call `append` and compile the file, you will find that it calls down to `growslice` in `src/runtime/slice.go`
+
+```go
+a = append(a, 3)
+```
+
+The grow pattern
 
