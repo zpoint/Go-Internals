@@ -123,5 +123,11 @@ If you call `append` and compile the file, you will find that it calls down to `
 a = append(a, 3)
 ```
 
-The grow pattern
+The grow pattern can be described as
+
+![./grow_pattern](./grow_pattern.png)
+
+When `cap` is less than 1024, `cap` is double each time, the grow speed is the yellow line
+
+When `cap` is greater than or equal 1024, `cap` grows `1/4` each time, the grow speed is the blue line
 

@@ -98,7 +98,9 @@ func chanrecv1(c *hchan, elem unsafe.Pointer) {
 
 `chanrecv` 的流程和 `chansend` 的流程类似
 
-首先, 锁住 `lock` 这把锁, 如果 `sendq` 不为空的话, 则尝试从里面弹出一个 goroutine 并获取该协程中存储的对应的元素, 如果 `sendq` 为空, 则尝试从环形队列中获取一个元素, 如果队列已经为空了, 则把当前协程加入`recvq` 并阻塞当前的 goroutine(有一个 block 参数判断需不需要阻塞, 当前值为 `true`)
+首先, 锁住  `lock`  这把锁, 如果  `sendq`  不为空的话, 并且  `buf`  也不为空, 则尝试从 `buf` 队列头部取出一个元素, 并从  `sendq`  中弹出一个协程, 协程中的数据拷贝到队尾, 如果  `buf`  为空, 则直接获取弹出协程中存储的对应的元素
+
+如果 `sendq` 为空, 则尝试从环形队列中获取一个元素, 如果队列已经为空了, 则把当前协程加入`recvq` 并阻塞当前的 goroutine(有一个 block 参数判断需不需要阻塞, 当前值为 `true`)
 
 ![chanrecv](./chanrecv.png)
 

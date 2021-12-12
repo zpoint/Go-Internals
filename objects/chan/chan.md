@@ -102,7 +102,9 @@ func chanrecv1(c *hchan, elem unsafe.Pointer) {
 
 The procedure of `chanrecv` is similar to the procedure of `chansend`
 
-First acquire the `lock`, try to pop an element and receive from a goroutine if there exist a goroutine in `sendq`, if `sendq` is empty, try to receive element from the circular queue, otherwise add the current goroutine to `recvq` and block the current running goroutine(a parameter `block` controls whether the current goroutine will be blocked, currently it's `true`)
+First acquire the `lock`, if there exist a goroutine in `sendq`, try to pop an element from `buf `  and push the element in a goroutine in `sendq` to the end of the queue if `buf ` is not empty, otherwise receive from `sendq` directly
+
+If `sendq` is empty, try to receive element from the circular queue, otherwise add the current goroutine to `recvq` and block the current running goroutine(a parameter `block` controls whether the current goroutine will be blocked, currently it's `true`)
 
 ![chanrecv](./chanrecv.png)
 
