@@ -25,7 +25,7 @@
 
 ## 概览
 
-本文侧重点是从源码角度分析gc的不同阶段的实现, 在此之前你需要了解 [三色标记法](https://pusher.github.io/tricolor-gc-visualization/) 和 [go 中的垃圾回收](https://www.ardanlabs.com/blog/2018/12/garbage-collection-in-go-part1-semantics.html) (参加 [更多资料](#更多资料) 中的文章)
+本文侧重点是从源码角度分析gc的标记阶段实现, 在此之前你需要了解 [三色标记法](https://pusher.github.io/tricolor-gc-visualization/) 和 [go 中的垃圾回收](https://www.ardanlabs.com/blog/2018/12/garbage-collection-in-go-part1-semantics.html) (参加 [更多资料](#更多资料) 中的文章)
 
 同时也需要对 [go 内存分配](https://github.com/zpoint/Go-Internals/blob/master/runtime/memory_management/memory_management_cn.md)  有基本的了解
 
