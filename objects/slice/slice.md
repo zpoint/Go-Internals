@@ -10,6 +10,8 @@
 
 [growslice](#growslice)
 
+[slice](#slice)
+
 ## related file
 
 * src/runtime/slice.go
@@ -40,6 +42,8 @@ func main() {
 ```
 
 If you try to compile the above code `go tool compile -S -N -l main.go`
+
+The compile procedure can be found [here](https://github.com/golang/go/blob/go1.16.7/src/cmd/compile/internal/gc/ssa.go)
 
 ```shell
 "".main STEXT size=123 args=0x0 locals=0x50 funcid=0x0
@@ -130,4 +134,8 @@ The grow pattern can be described as
 When `cap` is less than 1024, `cap` is double each time, the grow speed is the yellow line
 
 When `cap` is greater than or equal 1024, `cap` grows `1/4` each time, the grow speed is the blue line
+
+The growslice is not actually called each time you call `append`, look at all the `asm` we can find that the program jumps over the call to runtime.growslice when the slice has sufficient capacity for the append operation
+
+## slice
 
