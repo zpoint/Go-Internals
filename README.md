@@ -24,6 +24,7 @@ git reset --hard 891547e2d4bc2a23973e2c9f972ce69b2b48478e
 
 - [x] [map](https://github.com/zpoint/Go-Internals/blob/master/objects/map/map.md)
 - [x] [channel](https://github.com/zpoint/Go-Internals/blob/master/objects/chan/chan.md)
+- [x] [slice](https://github.com/zpoint/Go-Internals/blob/master/objects/slice/slice.md)
 
 # Runtime
 

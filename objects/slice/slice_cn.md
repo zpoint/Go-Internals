@@ -1,6 +1,6 @@
-# slice![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals%2F/runtime/slice)
+# slice![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals%2F/runtime/slice_cn)
 
-## contents
+## 目录
 
 [related file](#related-file)
 
@@ -12,19 +12,19 @@
 
 [slice](#slice)
 
-## related file
+## 相关位置文件
 
 * src/runtime/slice.go
 
-## memory layout
+## 内存构造
 
-The layout of slice is quiet simple
+slice 结构的内存构造比较简洁
 
-`array` is the pointer to the beginning of the data
+`array` 指向数据部分的开始位置
 
-`len` is the size of element currently in `slice`
+`len` 是`slice` 当前存储的元素个数
 
-`cap` is the capacity of the `slice`
+`cap` 是 `array` 指向的空间实际申请的空间大小(能容纳多少个元素)
 
 ![./layout](./layout.png)
 
@@ -41,9 +41,9 @@ func main() {
 }
 ```
 
-If you try to compile the above code `go tool compile -S -N -l main.go`
+如果你尝试编译上述代码 `go tool compile -S -N -l main.go`
 
-The compile procedure can be found [here](https://github.com/golang/go/blob/go1.16.7/src/cmd/compile/internal/gc/ssa.go)
+编译生成SSA的代码在 [这里](https://github.com/golang/go/blob/go1.16.7/src/cmd/compile/internal/gc/ssa.go)
 
 ```shell
 "".main STEXT size=123 args=0x0 locals=0x50 funcid=0x0
@@ -69,9 +69,9 @@ The compile procedure can be found [here](https://github.com/golang/go/blob/go1.
 .......
 ```
 
-We can find that go compiler use the current function stack to store slice `a` instead of mallocing from heap
+我们可以发现 go 编译器把 `a` 存储在了函数堆栈中, 而不是从 `heap` 中申请
 
-If we modify it to a larger slice
+我们把 `a` 改成更大的 `slice`
 
 ```go
 package main
@@ -82,7 +82,7 @@ func main() {
 }
 ```
 
-Now the `runtime.makeslice` is called and the slice is malloced from the runtime heap
+现在调用了 `runtime.makeslice` , `slice` 会从运行时的 `heap` 中申请空间
 
 ```shell
 "".main STEXT size=118 args=0x0 locals=0x38 funcid=0x0
@@ -109,7 +109,7 @@ Now the `runtime.makeslice` is called and the slice is malloced from the runtime
 
 ## makeslice
 
-The `makeslice` calculate how many bytes needed according to the `type` and `cap`  of the current `slice`, and do something if overflow occured
+`makeslice` 根据当前 `slice`  的 `type` 大小, 和 `cap` 的值, 计算需要多少空间, 并调用 `mallocgc` 从运行时 `heap` 中申请空间, 在这之前会检查是否会造成溢出
 
 ```go
 func makeslice(et *_type, len, cap int) unsafe.Pointer {
@@ -121,21 +121,21 @@ func makeslice(et *_type, len, cap int) unsafe.Pointer {
 
 ## growslice
 
-If you call `append` and compile the file, you will find that it calls down to `growslice` in `src/runtime/slice.go`
+如果你调用了 `append`, 编译后会发现它最终调用了 `src/runtime/slice.go` 中的  `growslice` 方法
 
 ```go
 a = append(a, 3)
 ```
 
-The grow pattern can be described as
+空间的增加速率如下图所示
 
 ![./grow_pattern](./grow_pattern.png)
 
-When `cap` is less than 1024, `cap` is double each time, the grow speed is the yellow line
+当 `cap`  小于 1024 时, `cap` 在每次增长时都空间翻倍, 符合黄线的速率
 
-When `cap` is greater than or equal 1024, `cap` grows `1/4` each time, the grow speed is the blue line
+当 `cap` 大于等于 1024 时, `cap` 每次增长 `1/4`, 符合蓝线的增长速率
 
-The growslice is not actually called each time you call `append`, look at all the `asm` we can find that the program jumps over the call to runtime.growslice when the slice has sufficient capacity for the append operation
+`growslice` 并不是每次调用 `append` 都会调用的, 你观察编译生成的代码会发现调用之前判断了 `cap` 和 `len`, 只有空间不足时才跳到`growslice` 的调用部分代码
 
 ## slice
 
@@ -150,11 +150,11 @@ func main() {
 }
 ```
 
-If we compile the above code, we can find that only the value of  `a.len` and `a.cap` is modified, there's no memory allocation and free
+观察上述代码的编译结果, 可以发现  `a.len` 的值和 `a.cap` 被重新调整了, 这里不涉及新的内存分配和释放
 
  ![./slice_before](./slice_before.png)
 
-So they both points to the same array
+所以他们都指向同一个原始空间
 
 ![slice_after](./slice_after.png)
 
