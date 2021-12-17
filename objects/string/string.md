@@ -1,10 +1,12 @@
-# string
+# string![image title](http://www.zpoint.xyz:8080/count/tag.svg?url=github%2Fgo-Internals%2F/runtime/string)
 
 ## contents
 
 [related file](#related-file)
 
 [memory layout](#memory-layout)
+
+[encoding](#encoding)
 
 [read more](#read-more)
 
@@ -72,6 +74,19 @@ func main() {
 		println(pos, strconv.FormatInt(int64(val), 16))
 	}
 }
+```
+
+The output is 
+
+```shell
+0 6211
+1 662f
+0 e6
+1 88
+2 91
+3 e6
+4 98
+5 af
 ```
 
 We can learn from the above code that `rune` will iterate over each `unicode` in the string
