@@ -38,3 +38,9 @@ git reset --hard 891547e2d4bc2a23973e2c9f972ce69b2b48478e
 - [x] [垃圾回收](https://github.com/zpoint/Go-Internals/blob/1.15/runtime/gc/gc_cn.md)
 - [x] [内存管理](https://github.com/zpoint/Go-Internals/blob/1.15/runtime/memory_management/memory_management_cn.md)
 
+
+
+# 学习资料
+
+[\<\<Go语言设计与实现\>\>](https://item.jd.com/13521160.html)
+
